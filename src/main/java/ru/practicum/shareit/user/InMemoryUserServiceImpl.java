@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user;
 
+import java.util.*;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.DuplicateException;
@@ -8,11 +9,9 @@ import ru.practicum.shareit.exception.NullObjectException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.*;
-
 @Service
 @AllArgsConstructor
-public class InMemoryUserService implements UserService {
+public class InMemoryUserServiceImpl implements UserService {
 
     private UserStorage userStorage;
     private final Map<String, Integer> emails = new HashMap<>();
@@ -91,8 +90,8 @@ public class InMemoryUserService implements UserService {
     private  void isValid(User user) {
         if (user == null) {
             throw new ValidationException("Отсутствуют данные пользователя!");
-        } else if (user.getEmail() == null || user.getEmail().isBlank() ||
-                !user.getEmail().contains("@")) {
+        } else if (user.getEmail() == null || user.getEmail().isBlank()
+                || !user.getEmail().contains("@")) {
             throw new ValidationException("Неверная электронная почта!");
         } else if (user.getName() == null || user.getName().isBlank()) {
             throw new ValidationException("Неверное имя пользователя!");

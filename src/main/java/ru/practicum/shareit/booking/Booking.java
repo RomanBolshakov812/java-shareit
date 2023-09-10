@@ -1,10 +1,9 @@
 package ru.practicum.shareit.booking;
 
+import java.time.LocalDate;
 import lombok.Data;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
-
-import java.time.LocalDate;
 
 @Data
 public class Booking {
