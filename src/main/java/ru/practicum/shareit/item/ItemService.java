@@ -2,14 +2,11 @@ package ru.practicum.shareit.item;
 
 import java.util.List;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.model.Item;
 
 public interface ItemService {
-    public Item addItem(ItemDto itemDto, Integer ownerId);
+    public ItemDto addItem(ItemDto itemDto, Integer ownerId);
 
-    public Item updateItem(Integer itemId, Item item, Integer ownerId);
-
-    public void deleteItem(Integer itemId);
+    public ItemDto updateItem(Integer itemId, ItemDto itemDto, Integer ownerId);
 
     public List<ItemDto> getItemsByOwnerId(Integer ownerId);
 

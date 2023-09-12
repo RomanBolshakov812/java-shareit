@@ -1,10 +1,9 @@
 package ru.practicum.shareit.item;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.springframework.stereotype.Component;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 
 @Component
@@ -14,10 +13,11 @@ public class InMemoryItemStorage implements ItemStorage {
     private int generatedId = 1;
 
     @Override
-    public Item createItem(Item item) {
-        item.setId(generatedId++);
+    public ItemDto createItem(ItemDto itemDto, Integer ownerId) {
+        Integer itemId = generatedId++;
+        Item item = ItemMapper.toItem(itemDto, itemId, ownerId);
         items.put(item.getId(), item);
-        return item;
+        return ItemMapper.toItemDto(item);
     }
 
     @Override
@@ -28,22 +28,35 @@ public class InMemoryItemStorage implements ItemStorage {
     }
 
     @Override
-    public void deleteItem(Integer itemId) {
-
-    }
-
-    @Override
-    public List<Item> getAllItems() {
-        return new ArrayList<>(items.values());
-    }
-
-    @Override
-    public List<Item> getItemsByOwnerId() {
-        return null;
+    public List<ItemDto> getItemsByOwnerId(Integer ownerId) {
+        List<ItemDto> itemsOfOwner = new ArrayList<>();
+        for (Item item : items.values()) {
+            if (Objects.equals(item.getOwnerId(), ownerId)) {
+                itemsOfOwner.add(ItemMapper.toItemDto(item));
+            }
+        }
+        return itemsOfOwner;
     }
 
     @Override
     public Item getItem(Integer itemId) {
         return items.get(itemId);
+    }
+
+    @Override
+    public List<ItemDto> searchItem(String text) {
+        String textInLowerCase = text.toLowerCase();
+        List<ItemDto> foundItems = new ArrayList<>();
+        if (!text.isBlank()) {
+            for (Item item : items.values()) {
+                if (item.getName().toLowerCase().contains(textInLowerCase)
+                        || item.getDescription().toLowerCase().contains(textInLowerCase)) {
+                    if (item.getAvailable()) {
+                        foundItems.add(ItemMapper.toItemDto(item));
+                    }
+                }
+            }
+        }
+        return foundItems;
     }
 }

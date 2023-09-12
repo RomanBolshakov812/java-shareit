@@ -1,9 +1,8 @@
 package ru.practicum.shareit.item;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NullObjectException;
 import ru.practicum.shareit.exception.ValidationException;
@@ -13,59 +12,43 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserStorage;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class InMemoryItemServiceImpl implements ItemService {
 
-    private ItemStorage itemStorage;
-    private UserStorage userStorage;
+    private final ItemStorage itemStorage;
+    private final UserStorage userStorage;
 
     @Override
-    public Item addItem(ItemDto itemDto, Integer ownerId) {
+    public ItemDto addItem(ItemDto itemDto, Integer ownerId) {
+        isValid(itemDto);
         if (userStorage.getUser(ownerId) == null) {
             throw new NullObjectException("Пользователь с id = " + ownerId + " не найден!");
         }
-        isValid(itemDto, ownerId);
-        Item item = new Item();
-        item.setName(itemDto.getName());
-        item.setDescription(itemDto.getDescription());
-        item.setAvailable(itemDto.getAvailable());
-        item.setOwnerId(ownerId);
-        item.setRequest(null);
-        itemStorage.createItem(item);
-        return item;
+        return itemStorage.createItem(itemDto, ownerId);
     }
 
     @Override
-    public Item updateItem(Integer itemId, Item item, Integer ownerId) {
-        Item currentItem = itemStorage.getItem(itemId);
-        if (!Objects.equals(currentItem.getOwnerId(), ownerId)) {
+    public ItemDto updateItem(Integer itemId, ItemDto itemDto, Integer ownerId) {
+        Item updatedItem = itemStorage.getItem(itemId);
+        Item currentItem = ItemMapper.toItem(itemDto, itemId, ownerId);
+        if (!Objects.equals(updatedItem.getOwnerId(), ownerId)) {
             throw new NullObjectException("Неверный id владельца вещи!");
         }
-        if (item.getName() != null) {
-            currentItem.setName(item.getName());
+        if (currentItem.getName() != null) {
+            updatedItem.setName(currentItem.getName());
         }
-        if (item.getDescription() != null) {
-            currentItem.setDescription(item.getDescription());
+        if (currentItem.getDescription() != null) {
+            updatedItem.setDescription(currentItem.getDescription());
         }
-        if (item.getAvailable() != null) {
-            currentItem.setAvailable(item.getAvailable());
+        if (currentItem.getAvailable() != null) {
+            updatedItem.setAvailable(currentItem.getAvailable());
         }
-        return itemStorage.updateItem(currentItem);
-    }
-
-    @Override
-    public void deleteItem(Integer itemId) {
+        return ItemMapper.toItemDto(itemStorage.updateItem(updatedItem));
     }
 
     @Override
     public List<ItemDto> getItemsByOwnerId(Integer ownerId) {
-        List<ItemDto> itemsOfOwner = new ArrayList<>();
-        for (Item item : itemStorage.getAllItems()) {
-            if (Objects.equals(item.getOwnerId(), ownerId)) {
-                itemsOfOwner.add(ItemMapper.toItemDto(item));
-            }
-        }
-        return itemsOfOwner;
+        return itemStorage.getItemsByOwnerId(ownerId);
     }
 
     @Override
@@ -76,26 +59,11 @@ public class InMemoryItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> searchItem(String text) {
-        String textInLowerCase = text.toLowerCase();
-        List<Item> items = itemStorage.getAllItems();
-        List<ItemDto> foundItems = new ArrayList<>();
-        if (!text.isBlank()) {
-            for (Item item : items) {
-                if (item.getName().toLowerCase().contains(textInLowerCase)
-                        || item.getDescription().toLowerCase().contains(textInLowerCase)) {
-                    if (item.getAvailable()) {
-                        foundItems.add(ItemMapper.toItemDto(item));
-                    }
-                }
-            }
-        }
-        return foundItems;
+        return itemStorage.searchItem(text);
     }
 
-    private  void isValid(ItemDto itemDto, Integer ownerId) {
-        if (ownerId == null) {
-            throw new ValidationException("Отсутствует id владельца вещи!");
-        } else if (itemDto == null) {
+    private  void isValid(ItemDto itemDto) {
+        if (itemDto == null) {
             throw new ValidationException("Отсутствуют данные создаваемой вещи!");
         } else if (itemDto.getName() == null || itemDto.getName().isBlank()) {
             throw new ValidationException("Отсутствует название вещи!");

@@ -14,7 +14,14 @@ public class ItemMapper {
         );
     }
 
-    public static Item toItem(ItemDto itemDto) {
-        return null;
+    public static Item toItem(ItemDto itemDto, Integer itemId, Integer itemOwner) {
+        return new Item(
+                itemId,
+                itemDto.getName(),
+                itemDto.getDescription(),
+                itemDto.getAvailable(),
+                itemOwner,
+                null
+        );
     }
 }
