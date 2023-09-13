@@ -7,10 +7,10 @@ import ru.practicum.shareit.user.model.User;
 
 @Data
 public class Booking {
-    private Integer id; //— уникальный идентификатор бронирования;
-    private LocalDate start; //— дата и время начала бронирования;
-    private LocalDate end; //— дата и время конца бронирования;
-    private Item item; //— вещь, которую пользователь бронирует;
-    private User booker; //— пользователь, который осуществляет бронирование;
-    private BookingStatus status; //— статус бронирования.
+    private Integer id;
+    private LocalDate start;
+    private LocalDate end;
+    private Item item;
+    private User booker;
+    private BookingStatus status;
 }

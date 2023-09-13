@@ -3,8 +3,6 @@ package ru.practicum.shareit.user;
 import java.util.*;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exception.DuplicateException;
-import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
 @Component
@@ -15,29 +13,30 @@ public class InMemoryUserStorage implements UserStorage {
     private int generatedId = 1;
 
     @Override
-    public UserDto createUser(UserDto userDto) {
-        if (emails.contains(userDto.getEmail())) {
+    public User createUser(User user) {
+        if (emails.contains(user.getEmail())) {
             throw new DuplicateException("Пользователь с таким email уже существует!");
         }
-        userDto.setId(generatedId++);
-        User user = UserMapper.toUser(userDto);
-        emails.add(userDto.getEmail());
+        user.setId(generatedId++);
+        emails.add(user.getEmail());
         users.put(user.getId(), user);
-        return userDto;
+        return user;
     }
 
     @Override
-    public User updateUser(User user, String userNewEmail) {
-        if (userNewEmail != null && !user.getEmail().equals(userNewEmail)) {
+    public User updateUser(User updateUser) {
+        User oldUser = users.get(updateUser.getId());
+        String userOldEmail = oldUser.getEmail();
+        String userNewEmail = updateUser.getEmail();
+        if (!userNewEmail.equals(userOldEmail)) {
             if (emails.contains(userNewEmail)) {
                 throw new DuplicateException("Пользователь с таким email уже существует!");
             }
-            emails.remove(user.getEmail());
+            emails.remove(userOldEmail);
             emails.add(userNewEmail);
-            user.setEmail(userNewEmail);
         }
-        users.put(user.getId(), user);
-        return user;
+        users.put(updateUser.getId(), updateUser);
+        return updateUser;
     }
 
     @Override

@@ -7,6 +7,7 @@ import ru.practicum.shareit.exception.NegativeValueException;
 import ru.practicum.shareit.exception.NullObjectException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
 @Service
@@ -18,23 +19,29 @@ public class InMemoryUserServiceImpl implements UserService {
     @Override
     public UserDto addUser(UserDto userDto) {
         isValid(userDto);
-        return userStorage.createUser(userDto);
+        User user = UserMapper.toUser(userDto);
+        return UserMapper.toUserDto(userStorage.createUser(user));
     }
 
     @Override
-    public User updateUser(Integer userId, User user) {
+    public UserDto updateUser(Integer userId, UserDto userDto) {
         User oldUser = userStorage.getUser(userId);
-        String userNewName = user.getName();
-        String userNewEmail = user.getEmail();
-        if (userId == null || userStorage.getUser(userId) == null) {
-            throw new NullObjectException("Пользователь с id = " + user.getId() + " не найден!");
+        if (userId == null || oldUser == null) {
+            throw new NullObjectException("Пользователь с id = " + userId + " не найден!");
         } else if (userId < 0) {
             throw new NegativeValueException("Передано отрицательное значение id!");
         }
-        if (userNewName != null) {
-            oldUser.setName(userNewName);
+        User updateUser = UserMapper.toUser(userDto);
+        String userNewName = updateUser.getName();
+        String userNewEmail = updateUser.getEmail();
+        if (userNewName == null) {
+            updateUser.setName(oldUser.getName());
         }
-        return userStorage.updateUser(oldUser, userNewEmail);
+        if (userNewEmail == null) {
+            updateUser.setEmail(oldUser.getEmail());
+        }
+        updateUser.setId(userId);
+        return UserMapper.toUserDto(userStorage.updateUser(updateUser));
     }
 
     @Override
@@ -43,17 +50,17 @@ public class InMemoryUserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> getAllUsers() {
-        return userStorage.getAllUsers();
+    public List<UserDto> getAllUsers() {
+        return UserMapper.toListUserDto(userStorage.getAllUsers());
     }
 
     @Override
-    public User getUser(Integer userId) {
+    public UserDto getUser(Integer userId) {
         User user = userStorage.getUser(userId);
         if (user == null) {
             throw new NullObjectException("Пользователь с id = " + userId + " не найден!");
         }
-        return user;
+        return UserMapper.toUserDto(user);
     }
 
     private  void isValid(UserDto userDto) {

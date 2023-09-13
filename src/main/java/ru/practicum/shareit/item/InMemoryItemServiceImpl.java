@@ -24,13 +24,14 @@ public class InMemoryItemServiceImpl implements ItemService {
         if (userStorage.getUser(ownerId) == null) {
             throw new NullObjectException("Пользователь с id = " + ownerId + " не найден!");
         }
-        return itemStorage.createItem(itemDto, ownerId);
+        Item item = ItemMapper.toItem(itemDto, ownerId);
+        return ItemMapper.toItemDto(itemStorage.createItem(item));
     }
 
     @Override
     public ItemDto updateItem(Integer itemId, ItemDto itemDto, Integer ownerId) {
         Item updatedItem = itemStorage.getItem(itemId);
-        Item currentItem = ItemMapper.toItem(itemDto, itemId, ownerId);
+        Item currentItem = ItemMapper.toItem(itemDto, ownerId);
         if (!Objects.equals(updatedItem.getOwnerId(), ownerId)) {
             throw new NullObjectException("Неверный id владельца вещи!");
         }
@@ -48,7 +49,8 @@ public class InMemoryItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> getItemsByOwnerId(Integer ownerId) {
-        return itemStorage.getItemsByOwnerId(ownerId);
+        List<Item> itemsByOwnerId = itemStorage.getItemsByOwnerId(ownerId);
+        return ItemMapper.toListItemDto(itemsByOwnerId);
     }
 
     @Override
@@ -59,7 +61,7 @@ public class InMemoryItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> searchItem(String text) {
-        return itemStorage.searchItem(text);
+        return ItemMapper.toListItemDto(itemStorage.searchItem(text));
     }
 
     private  void isValid(ItemDto itemDto) {
