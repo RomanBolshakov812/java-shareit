@@ -8,7 +8,7 @@ import ru.practicum.shareit.item.model.Item;
 public class InMemoryItemStorage implements ItemStorage {
 
     private final Map<Integer, Item> items = new HashMap<>();
-    private final Map<Integer, Set<Integer>> itemsIdOfOwner = new HashMap<>();
+    private final Map<Integer, List<Item>> itemsOfOwner = new HashMap<>();
     private int generatedId = 1;
 
     @Override
@@ -16,12 +16,12 @@ public class InMemoryItemStorage implements ItemStorage {
         Integer itemId = generatedId++;
         item.setId(itemId);
         items.put(itemId, item);
-        Set<Integer> itemsId = new HashSet<>();
-        if (itemsIdOfOwner.containsKey(item.getOwnerId())) {
-            itemsId = itemsIdOfOwner.get(item.getOwnerId());
+        List<Item> itemsOfCurrentOwner = new ArrayList<>();
+        if (itemsOfOwner.containsKey(item.getOwnerId())) {
+            itemsOfCurrentOwner = itemsOfOwner.get(item.getOwnerId());
         }
-        itemsId.add(item.getId());
-        itemsIdOfOwner.put(item.getOwnerId(), itemsId);
+        itemsOfCurrentOwner.add(item);
+        itemsOfOwner.put(item.getOwnerId(), itemsOfCurrentOwner);
         return item;
     }
 
@@ -34,11 +34,7 @@ public class InMemoryItemStorage implements ItemStorage {
 
     @Override
     public List<Item> getItemsByOwnerId(Integer ownerId) {
-        List<Item> itemsOfCurrentOwner = new ArrayList<>();
-        for (Integer itemId : itemsIdOfOwner.get(ownerId)) {
-            itemsOfCurrentOwner.add(items.get(itemId));
-        }
-        return itemsOfCurrentOwner;
+        return new ArrayList<>(itemsOfOwner.get(ownerId));
     }
 
     @Override
