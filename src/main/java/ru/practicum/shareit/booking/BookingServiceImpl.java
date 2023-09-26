@@ -71,10 +71,11 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingRepository.getBookingById(bookingId)
                 .orElseThrow(() -> new EntityNullException("Бронирование с id = "
                         + bookingId + " не найдено!"));
-        if (!Objects.equals(booking.getBooker().getId(), sharerId)
-                & !Objects.equals(booking.getItem().getOwnerId(), sharerId)) {
-            throw new NullObjectException("Пользователь c id = "
-                    + sharerId + " не является хозяином вещи или автором бронирования!");
+        if (!Objects.equals(booking.getBooker().getId(), sharerId)) {
+            if (!Objects.equals(booking.getItem().getOwnerId(), sharerId)) {
+                throw new NullObjectException("Пользователь c id = "
+                        + sharerId + " не является хозяином вещи или автором бронирования!");
+            }
         }
         return BookingMapper.toBookingDtoOut(booking);
     }
