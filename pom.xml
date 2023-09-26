@@ -5,8 +5,8 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.7.2</version> <!-- 2.7.12 // 2.7.2 -->
-		<relativePath/> <!-- lookup parent from repository -->
+		<version>2.7.2</version>
+		<relativePath/>
 	</parent>
 
 	<groupId>ru.practicum</groupId>
@@ -16,6 +16,7 @@
 	<name>ShareIt</name>
 
 	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>11</java.version>
 	</properties>
 
@@ -33,7 +34,6 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<!--<version>42.5.4</version>--> <!-- 42.5.4 // 42.3.2 -->
 			<scope>runtime</scope>
 		</dependency>
 
@@ -46,8 +46,7 @@
 		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-jpa</artifactId>
-			<version>2.6.1</version> <!-- Старая версия 2.6.1 // Новая версия 3.1.0 -->
-			<!--<scope>runtime</scope>-->
+			<version>2.6.1</version>
 		</dependency>
 
 		<dependency>
@@ -58,7 +57,6 @@
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
-			<!--<version>5.4.17.Final</version>--> <!-- Новая версия 6.1.7.Final // Старая версия 5.4.17.Final -->
 			<scope>runtime</scope>
 		</dependency>
 
