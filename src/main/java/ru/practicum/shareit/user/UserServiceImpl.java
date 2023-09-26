@@ -3,8 +3,8 @@ package ru.practicum.shareit.user;
 import java.util.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exception.EntityNullException;
 import ru.practicum.shareit.exception.NegativeValueException;
-import ru.practicum.shareit.exception.NullObjectException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
@@ -12,23 +12,23 @@ import ru.practicum.shareit.user.model.User;
 
 @Service
 @RequiredArgsConstructor
-public class InMemoryUserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService {
 
-    private final UserStorage userStorage;
+    private final UserRepository repository;
 
     @Override
     public UserDto addUser(UserDto userDto) {
         isValid(userDto);
         User user = UserMapper.toUser(userDto);
-        return UserMapper.toUserDto(userStorage.createUser(user));
+        repository.save(user);
+        return UserMapper.toUserDto(repository.save(user));
     }
 
     @Override
     public UserDto updateUser(Integer userId, UserDto userDto) {
-        User oldUser = userStorage.getUser(userId);
-        if (userId == null || oldUser == null) {
-            throw new NullObjectException("Пользователь с id = " + userId + " не найден!");
-        } else if (userId < 0) {
+
+        User oldUser = repository.getById(userId);
+        if (userId < 0) {
             throw new NegativeValueException("Передано отрицательное значение id!");
         }
         User updateUser = UserMapper.toUser(userDto);
@@ -41,26 +41,23 @@ public class InMemoryUserServiceImpl implements UserService {
             updateUser.setEmail(oldUser.getEmail());
         }
         updateUser.setId(userId);
-        return UserMapper.toUserDto(userStorage.updateUser(updateUser));
+        return UserMapper.toUserDto(repository.save(updateUser));
     }
 
     @Override
     public void deleteUser(Integer userId) {
-        userStorage.deleteUser(userId);
+        repository.deleteById(userId);
     }
 
     @Override
     public List<UserDto> getAllUsers() {
-        return UserMapper.toListUserDto(userStorage.getAllUsers());
+        return UserMapper.toListUserDto(repository.findAll());
     }
 
     @Override
     public UserDto getUser(Integer userId) {
-        User user = userStorage.getUser(userId);
-        if (user == null) {
-            throw new NullObjectException("Пользователь с id = " + userId + " не найден!");
-        }
-        return UserMapper.toUserDto(user);
+        return UserMapper.toUserDto(repository.getUserById(userId).orElseThrow(() ->
+                new EntityNullException("Пользователь с id = " + userId + " не найден!")));
     }
 
     private  void isValid(UserDto userDto) {
