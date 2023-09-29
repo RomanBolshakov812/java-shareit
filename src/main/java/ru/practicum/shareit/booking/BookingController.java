@@ -1,6 +1,8 @@
 package ru.practicum.shareit.booking;
 
 import java.util.List;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDtoIn;
@@ -14,7 +16,8 @@ public class BookingController {
     private final BookingService bookingService;
 
     @PostMapping
-    public BookingDtoOut createBooking(@RequestBody BookingDtoIn bookingDtoIn,
+    public BookingDtoOut createBooking(@Valid @RequestBody BookingDtoIn bookingDtoIn,
+                                       @NotNull(message = "Отсутствует id пользователя!")
                                        @RequestHeader("X-Sharer-User-Id") Integer bookerId) {
         return bookingService.addBooking(bookingDtoIn, bookerId);
     }

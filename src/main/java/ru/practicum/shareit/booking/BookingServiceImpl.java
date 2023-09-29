@@ -1,9 +1,9 @@
 package ru.practicum.shareit.booking;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import javax.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDtoIn;
@@ -30,13 +30,21 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingDtoOut addBooking(BookingDtoIn bookingDtoIn, Integer bookerId) {
         isValid(bookingDtoIn);
+        Integer itemId = bookingDtoIn.getItemId();
+        LocalDateTime start = bookingDtoIn.getStart();
+        LocalDateTime end = bookingDtoIn.getEnd();
         User booker = userRepository.getUserById(bookerId).orElseThrow(() ->
                 new EntityNullException("Пользователь с id = " + bookerId + " не найден!"));
-        Item item = itemRepository.getItemById(bookingDtoIn.getItemId()).orElseThrow(() ->
+        Item item = itemRepository.getItemById(itemId).orElseThrow(() ->
                 new EntityNullException("Вещь с id = " + bookerId + " не найдена!"));
+        if (!item.getAvailable()) {
+            throw new ValidationException("Данная вещь недоступна!");
+        }
         if (bookerId.equals(item.getOwnerId())) {
             throw new NullObjectException("Хозяин вещи не может ее бронировать! "
                     + "Почему - загадка дыры.");
+        } else if (bookingRepository.findOverlapsBookings(itemId, start, end)) {
+            throw new ValidationException("На указанные даты уже есть бронирование!");
         }
         Booking booking = BookingMapper.toBookingOfDtoIn(bookingDtoIn, item, booker);
         booking.setStatus(BookingState.WAITING);
@@ -52,7 +60,8 @@ public class BookingServiceImpl implements BookingService {
         } else {
             state = BookingState.REJECTED;
         }
-        Booking booking = bookingRepository.getById(bookingId);
+        Booking booking = bookingRepository.getBookingById(bookingId).orElseThrow(() ->
+                new EntityNullException("Бронирование с id = " + bookingId + " не найдено!"));
         Item item = booking.getItem();
         if (Objects.equals(item.getOwnerId(), userId)) {
             if (!booking.getStatus().equals(BookingState.APPROVED)) {
@@ -82,33 +91,35 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingDtoOut> getBookingsByBookerId(Integer bookerId, String state) {
-        List<Booking> bookings;
-        switch (state) {
-            case "FUTURE":
+        List<Booking> bookings = new ArrayList<>();
+        switch (stateToEnum(state)) {
+            case FUTURE:
                 bookings = bookingRepository
                         .findBookingByBookerIdAndStartAfterOrderByStartDesc(bookerId,
                                 LocalDateTime.now());
                 break;
-            case "CURRENT":
+            case CURRENT:
                 bookings = bookingRepository.findAllBookingByBookerIdCurrent(bookerId);
                 break;
-            case "PAST":
+            case PAST:
                 bookings = bookingRepository.findAllBookingByBookerPast(bookerId);
                 break;
-            case "WAITING":
+            case WAITING:
                 bookings = bookingRepository.findBookingOfBookerByStatus(bookerId,
                         BookingState.WAITING);
                 break;
-            case "REJECTED":
+            case APPROVED:
+                bookings = bookingRepository.findBookingOfBookerByStatus(bookerId,
+                        BookingState.APPROVED);
+                break;
+            case REJECTED:
                 bookings = bookingRepository.findBookingOfBookerByStatus(bookerId,
                         BookingState.REJECTED);
                 break;
-            case "ALL":
+            default:
                 bookings = bookingRepository
                         .findBookingByBookerIdOrderByStartDesc(bookerId);
                 break;
-            default:
-                throw new UnsupportedStatusException("В запросе передан неверный статус: " + state);
         }
         if (bookings.size() == 0) {
             throw new EntityNullException("Бронирований для пользователя с id = "
@@ -118,31 +129,34 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDtoOut> getBookingsByOwnerId(Integer ownerId, String state) {
-        List<Booking> bookings;
-        switch (state) {
-            case "FUTURE":
+    public List<BookingDtoOut> getBookingsByOwnerId(Integer ownerId, String state)
+            throws UnsupportedStatusException {
+        List<Booking> bookings = new ArrayList<>();
+        switch (stateToEnum(state)) {
+            case FUTURE:
                 bookings = bookingRepository.findAllBookingByOwnerFuture(ownerId);
                 break;
-            case "CURRENT":
+            case CURRENT:
                 bookings = bookingRepository.findAllBookingByOwnerIdCurrent(ownerId);
                 break;
-            case "PAST":
+            case PAST:
                 bookings = bookingRepository.findAllBookingByOwnerPast(ownerId);
                 break;
-            case "WAITING":
+            case WAITING:
                 bookings = bookingRepository.findBookingOfOwnerByStatus(ownerId,
                         BookingState.WAITING);
                 break;
-            case "REJECTED":
+            case APPROVED:
+                bookings = bookingRepository.findBookingOfOwnerByStatus(ownerId,
+                        BookingState.APPROVED);
+                break;
+            case REJECTED:
                 bookings = bookingRepository.findBookingOfOwnerByStatus(ownerId,
                         BookingState.REJECTED);
                 break;
-            case "ALL":
+            default:
                 bookings = bookingRepository.findAllBookingByOwner(ownerId);
                 break;
-            default:
-                throw new UnsupportedStatusException("В запросе передан неверный статус: " + state);
         }
         if (bookings.size() == 0) {
             throw new EntityNullException("Бронирований для пользователя с id = "
@@ -151,26 +165,26 @@ public class BookingServiceImpl implements BookingService {
         return BookingMapper.toListBookingDtoOut(bookings);
     }
 
+    private BookingState stateToEnum(String state) {
+        BookingState status;
+        try {
+            status = BookingState.valueOf(state);
+            return status;
+        } catch (RuntimeException e) {
+            throw new UnsupportedStatusException("Передан неверный статус бронирования: "
+                    + state + "!");
+        }
+    }
+
     private  void isValid(BookingDtoIn bookingDtoIn) {
         LocalDateTime start = bookingDtoIn.getStart();
         LocalDateTime end = bookingDtoIn.getEnd();
-        if (start == null || end == null) {
+        if (start.isBefore(LocalDateTime.now())) {
+            throw new ValidationException("Неверная дата начала бронирования!");
+        } else if (end.isBefore(LocalDateTime.now())) {
+            throw new ValidationException("Неверная дата окончания бронирования!");
+        } else if (end.isBefore(start) || start.equals(end)) {
             throw new ValidationException("Неверные даты бронирования!");
-        }
-
-        try {
-            Item item = itemRepository.getById(bookingDtoIn.getItemId());
-            if (!item.getAvailable()) {
-                throw new ValidationException("Данная вещь недоступна!");
-            } else if (start.isBefore(LocalDateTime.now())) {
-                throw new ValidationException("Неверная дата начала бронирования!");
-            } else if (end.isBefore(LocalDateTime.now())) {
-                throw new ValidationException("Неверная дата окончания бронирования!");
-            } else if (end.isBefore(start) || start.equals(end)) {
-                throw new ValidationException("Неверные даты бронирования!");
-            }
-        } catch (EntityNotFoundException e) {
-            throw new EntityNullException("Отсутствует id вещи!");
         }
     }
 }

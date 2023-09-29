@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.EntityNullException;
 import ru.practicum.shareit.exception.NegativeValueException;
-import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
@@ -18,7 +17,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto addUser(UserDto userDto) {
-        isValid(userDto);
         User user = UserMapper.toUser(userDto);
         repository.save(user);
         return UserMapper.toUserDto(repository.save(user));
@@ -27,7 +25,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto updateUser(Integer userId, UserDto userDto) {
 
-        User oldUser = repository.getById(userId);
+        User oldUser = repository.getUserById(userId).orElseThrow(() ->
+                new EntityNullException("Пользователь с id = " + userId + " не найден!"));
         if (userId < 0) {
             throw new NegativeValueException("Передано отрицательное значение id!");
         }
@@ -58,16 +57,5 @@ public class UserServiceImpl implements UserService {
     public UserDto getUser(Integer userId) {
         return UserMapper.toUserDto(repository.getUserById(userId).orElseThrow(() ->
                 new EntityNullException("Пользователь с id = " + userId + " не найден!")));
-    }
-
-    private  void isValid(UserDto userDto) {
-        if (userDto == null) {
-            throw new ValidationException("Отсутствуют данные пользователя!");
-        } else if (userDto.getEmail() == null || userDto.getEmail().isBlank()
-                || !userDto.getEmail().contains("@")) {
-            throw new ValidationException("Неверная электронная почта!");
-        } else if (userDto.getName() == null || userDto.getName().isBlank()) {
-            throw new ValidationException("Неверное имя пользователя!");
-        }
     }
 }

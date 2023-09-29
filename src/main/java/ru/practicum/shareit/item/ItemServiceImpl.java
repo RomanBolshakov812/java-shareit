@@ -32,7 +32,6 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto addItem(ItemDto itemDto, Integer ownerId) {
-        isValid(itemDto);
         UserMapper.toUserDto(userRepository.getUserById(ownerId).orElseThrow(() ->
                 new EntityNullException("Пользователь с id = " + ownerId + " не найден!")));
         Item item = ItemMapper.toItem(itemDto, ownerId);
@@ -41,7 +40,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto updateItem(Integer itemId, ItemDto itemDto, Integer ownerId) {
-        Item updatedItem = itemRepository.getById(itemId);
+        Item updatedItem = itemRepository.getItemById(itemId).orElseThrow(() ->
+        new EntityNullException("Вещь с id = " + itemId + " не найдена!"));
         if (!Objects.equals(updatedItem.getOwnerId(), ownerId)) {
             throw new NullObjectException("Неверный id владельца вещи!");
         }
@@ -105,17 +105,14 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public CommentDto addComment(CommentDto commentDto, Integer itemId, Integer authorId) {
-        isValidComment(commentDto, itemId, authorId);
+        isValid(itemId, authorId);
         LocalDateTime created = LocalDateTime.now();
-        Item item = itemRepository.getById(itemId);
-        User author = userRepository.getById(authorId);
-        Comment comment = new Comment();
-        comment.setText(commentDto.getText());
-        comment.setItem(item);
-        comment.setAuthor(author);
-        comment.setCreated(created);
-        commentRepository.save(comment);
-        return CommentMapper.toCommentDto(comment);
+        Item item = itemRepository.getItemById(itemId).orElseThrow(() ->
+                new EntityNullException("Вещь с id = " + itemId + " не найдена!"));
+        User author = userRepository.getUserById(authorId).orElseThrow(() ->
+                new EntityNullException("Пользователь с id = " + authorId + " не найден!"));
+        return CommentMapper.toCommentDto(commentRepository
+                .save(CommentMapper.toComment(commentDto, item, author, created)));
     }
 
     private Booking getLastBooking(Integer itemId) {
@@ -152,28 +149,12 @@ public class ItemServiceImpl implements ItemService {
         return nextBooking;
     }
 
-    private  void isValid(ItemDto itemDto) {
-        if (itemDto == null) {
-            throw new ValidationException("Отсутствуют данные создаваемой вещи!");
-        } else if (itemDto.getName() == null || itemDto.getName().isBlank()) {
-            throw new ValidationException("Отсутствует название вещи!");
-        } else if (itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
-            throw new ValidationException("Отсутствует описание вещи!");
-        } else if (itemDto.getAvailable() == null) {
-            throw new ValidationException("Отсутствует статус вещи!");
-        }
-    }
-
-    private void isValidComment(CommentDto commentDto, Integer itemId, Integer bookerId) {
+    private void isValid(Integer itemId, Integer bookerId) {
         List<LocalDateTime> endDatesBookings = bookingRepository.getListBookingEndDate(bookerId,
                 itemId);
-        if (commentDto == null) {
-            throw new ValidationException("Отсутствуют данные комментария!");
-        } else if (endDatesBookings.size() == 0) {
+        if (endDatesBookings.size() == 0) {
             throw new ValidationException("У пользователя с id = " + bookerId
                     + " нет бронирований вещи с id = " + itemId + "!");
-        } else if (commentDto.getText().isBlank()) {
-            throw new ValidationException("Отсутствует текст комментария!");
         }
         int completedBookingsCount = 0;
         for (LocalDateTime endDate : endDatesBookings) {

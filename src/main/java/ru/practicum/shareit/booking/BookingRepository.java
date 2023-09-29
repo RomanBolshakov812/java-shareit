@@ -63,4 +63,10 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
     // даты окончаний бронирований букера
     @Query("select b.end from Booking b where b.booker.id = ?1 and b.item.id = ?2")
     List<LocalDateTime> getListBookingEndDate(Integer bookerId, Integer itemId);
+
+    // Проверка на непересечение броней
+    @Query(nativeQuery = true, value = "select exists (select * from bookings b "
+            + "where b.item_id = ?1 and b.start_date between ?2 and ?3 "
+            + "or b.item_id = ?1 and b.end_date between ?2 and ?3)")
+    boolean findOverlapsBookings(Integer itemId, LocalDateTime start, LocalDateTime end);
 }
