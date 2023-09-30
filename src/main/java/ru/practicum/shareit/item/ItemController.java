@@ -2,7 +2,6 @@ package ru.practicum.shareit.item;
 
 import java.util.List;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.CommentDto;
