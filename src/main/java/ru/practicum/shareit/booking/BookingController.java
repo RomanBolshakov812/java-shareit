@@ -17,7 +17,6 @@ public class BookingController {
 
     @PostMapping
     public BookingDtoOut createBooking(@Valid @RequestBody BookingDtoIn bookingDtoIn,
-                                       @NotNull(message = "Отсутствует id пользователя!")
                                        @RequestHeader("X-Sharer-User-Id") Integer bookerId) {
         return bookingService.addBooking(bookingDtoIn, bookerId);
     }

@@ -29,10 +29,12 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDtoOut addBooking(BookingDtoIn bookingDtoIn, Integer bookerId) {
-        isValid(bookingDtoIn);
         Integer itemId = bookingDtoIn.getItemId();
         LocalDateTime start = bookingDtoIn.getStart();
         LocalDateTime end = bookingDtoIn.getEnd();
+        if (end.isBefore(start) || start.equals(end)) {
+            throw new ValidationException("Неверные даты бронирования!");
+        }
         User booker = userRepository.getUserById(bookerId).orElseThrow(() ->
                 new EntityNullException("Пользователь с id = " + bookerId + " не найден!"));
         Item item = itemRepository.getItemById(itemId).orElseThrow(() ->
@@ -175,16 +177,13 @@ public class BookingServiceImpl implements BookingService {
                     + state + "!");
         }
     }
-
+/*
     private  void isValid(BookingDtoIn bookingDtoIn) {
         LocalDateTime start = bookingDtoIn.getStart();
         LocalDateTime end = bookingDtoIn.getEnd();
-        if (start.isBefore(LocalDateTime.now())) {
-            throw new ValidationException("Неверная дата начала бронирования!");
-        } else if (end.isBefore(LocalDateTime.now())) {
-            throw new ValidationException("Неверная дата окончания бронирования!");
-        } else if (end.isBefore(start) || start.equals(end)) {
+        if (end.isBefore(start) || start.equals(end)) {
             throw new ValidationException("Неверные даты бронирования!");
         }
     }
+    */
 }

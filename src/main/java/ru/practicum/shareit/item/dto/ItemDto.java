@@ -11,7 +11,6 @@ import ru.practicum.shareit.booking.dto.BookingDtoShort;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@NotNull(message = "Отсутствуют данные создаваемой вещи!")
 public class ItemDto {
 
     private Integer id;
