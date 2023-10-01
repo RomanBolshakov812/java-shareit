@@ -66,6 +66,6 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
 
     // Проверка на непересечение броней
     @Query(nativeQuery = true, value = "select exists (select * from bookings b "
-            + "where b.item_id = ?1 and b.start_date <= ?3 and b.end_date >= ?2)")
+            + "where b.item_id = ?1 and b.start_date <= ?3 and b.end_date >= ?2 and b.status = 'APPROVED')")
     boolean findOverlapsBookings(Integer itemId, LocalDateTime start, LocalDateTime end);
 }
