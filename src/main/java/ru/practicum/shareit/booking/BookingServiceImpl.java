@@ -177,13 +177,4 @@ public class BookingServiceImpl implements BookingService {
                     + state + "!");
         }
     }
-/*
-    private  void isValid(BookingDtoIn bookingDtoIn) {
-        LocalDateTime start = bookingDtoIn.getStart();
-        LocalDateTime end = bookingDtoIn.getEnd();
-        if (end.isBefore(start) || start.equals(end)) {
-            throw new ValidationException("Неверные даты бронирования!");
-        }
-    }
-    */
 }

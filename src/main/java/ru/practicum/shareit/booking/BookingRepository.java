@@ -9,7 +9,7 @@ import ru.practicum.shareit.booking.model.Booking;
 
 public interface BookingRepository extends JpaRepository<Booking, Integer> {
 
-    Optional<Booking> getBookingById(Integer itemId);
+    Optional<Booking> getBookingById(Integer bookingId);
 
     // ALL для букера
     List<Booking> findBookingByBookerIdOrderByStartDesc(Integer bookerId);
@@ -47,11 +47,11 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
     List<Booking> findAllBookingByOwnerPast(Integer ownerId);
 
     // WAITING, APPROVED, REJECTED, CANCELLED для букера
-    @Query("select b from Booking b where b.booker.id = ?1 and b.status = ?2")
+    @Query("select b from Booking b where b.booker.id = ?1 and b.status = ?2 order by b.start desc")
     List<Booking> findBookingOfBookerByStatus(Integer bookerId, BookingState status);
 
     // WAITING, APPROVED, REJECTED, CANCELLED для хозяина вещей
-    @Query("select b from Booking b where b.item.ownerId = ?1 and b.status = ?2")
+    @Query("select b from Booking b where b.item.ownerId = ?1 and b.status = ?2 order by b.start desc")
     List<Booking> findBookingOfOwnerByStatus(Integer ownerId, BookingState status);
 
     // последнее бронирование
@@ -66,9 +66,6 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
 
     // Проверка на непересечение броней
     @Query(nativeQuery = true, value = "select exists (select * from bookings b "
-            + "where b.item_id = ?1 and b.start_date between ?2 and ?3 "
-            + "or b.item_id = ?1 and b.end_date between ?2 and ?3 "
-            + "or b.item_id = ?1 and ?2 between b.start_date and b.end_date "
-            + "or b.item_id = ?1 and ?3 between b.start_date and b.end_date)")
+            + "where b.item_id = ?1 and b.start_date <= ?3 and b.end_date >= ?2)")
     boolean findOverlapsBookings(Integer itemId, LocalDateTime start, LocalDateTime end);
 }
