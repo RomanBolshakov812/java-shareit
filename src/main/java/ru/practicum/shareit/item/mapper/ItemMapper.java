@@ -12,19 +12,21 @@ public class ItemMapper {
                 item.getName(),
                 item.getDescription(),
                 item.getAvailable(),
-                item.getRequest() != null ? item.getRequest().getId() : null
+                null,
+                null,
+                null,
+                item.getRequest() != null ? item.getRequest() : null
         );
     }
 
     public static Item toItem(ItemDto itemDto, Integer itemOwner) {
-        return new Item(
-                itemDto.getId(),
-                itemDto.getName(),
-                itemDto.getDescription(),
-                itemDto.getAvailable(),
-                itemOwner,
-                null
-        );
+        Item item = new Item();
+        item.setId(itemDto.getId());
+        item.setName(itemDto.getName());
+        item.setDescription(itemDto.getDescription());
+        item.setAvailable(itemDto.getAvailable());
+        item.setOwnerId(itemOwner);
+        return item;
     }
 
     public static List<ItemDto> toListItemDto(List<Item> items) {
