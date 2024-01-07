@@ -1,11 +1,15 @@
 package ru.practicum.shareit.item.model;
 
 import javax.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Entity
 @Table(name = "items")
+@AllArgsConstructor
+@NoArgsConstructor
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,6 +28,6 @@ public class Item {
     @Column(name = "owner_id")
     private Integer ownerId;
 
-    @Column(name = "item_request")
-    private Integer request;
+    @Column(name = "request_id")
+    private Integer requestId;
 }

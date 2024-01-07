@@ -3,6 +3,8 @@ package ru.practicum.shareit.booking;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.booking.model.Booking;
@@ -12,11 +14,11 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
     Optional<Booking> getBookingById(Integer bookingId);
 
     // ALL для букера
-    List<Booking> findBookingByBookerIdOrderByStartDesc(Integer bookerId);
+    Page<Booking> findBookingByBookerIdOrderByStartDesc(Integer bookerId, Pageable pageable);
 
     // ALL для хозяина вещей
     @Query("select b from Booking b where b.item.ownerId = ?1 order by b.start desc")
-    List<Booking> findAllBookingByOwner(Integer ownerId);
+    Page<Booking> findAllBookingByOwner(Integer ownerId, Pageable pageable);
 
     // FUTURE для букера
     List<Booking> findBookingByBookerIdAndStartAfterOrderByStartDesc(Integer bookerId,
@@ -51,7 +53,8 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
     List<Booking> findBookingOfBookerByStatus(Integer bookerId, BookingState status);
 
     // WAITING, APPROVED, REJECTED, CANCELLED для хозяина вещей
-    @Query("select b from Booking b where b.item.ownerId = ?1 and b.status = ?2 order by b.start desc")
+    @Query("select b from Booking b where b.item.ownerId = ?1 "
+            + "and b.status = ?2 order by b.start desc")
     List<Booking> findBookingOfOwnerByStatus(Integer ownerId, BookingState status);
 
     // последнее бронирование
@@ -66,6 +69,7 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
 
     // Проверка на непересечение броней
     @Query(nativeQuery = true, value = "select exists (select * from bookings b "
-            + "where b.item_id = ?1 and b.start_date <= ?3 and b.end_date >= ?2 and b.status = 'APPROVED')")
+            + "where b.item_id = ?1 and b.start_date <= ?3 and b.end_date >= ?2 "
+            + "and b.status = 'APPROVED')")
     boolean findOverlapsBookings(Integer itemId, LocalDateTime start, LocalDateTime end);
 }
