@@ -1,10 +1,12 @@
 package ru.practicum.shareit.booking;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDtoIn;
 import ru.practicum.shareit.booking.dto.BookingDtoOut;
@@ -55,7 +57,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingDtoOut updateBooking(Integer bookingId, Integer userId, String approved) {
+    public BookingDtoOut updateBooking(Integer bookingId, Integer ownerId, String approved) {
         BookingState state;
         if (Objects.equals(approved, "true")) {
             state = BookingState.APPROVED;
@@ -65,15 +67,16 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingRepository.getBookingById(bookingId).orElseThrow(() ->
                 new EntityNullException("Бронирование с id = " + bookingId + " не найдено!"));
         Item item = booking.getItem();
-        if (Objects.equals(item.getOwnerId(), userId)) {
+        if (Objects.equals(item.getOwnerId(), ownerId)) {
             if (!booking.getStatus().equals(BookingState.APPROVED)) {
                 booking.setStatus(state);
             } else {
                 throw new ValidationException("Бронирование уже подтверждено!");
             }
-            return BookingMapper.toBookingDtoOut(bookingRepository.save(booking));
+            bookingRepository.save(booking);
+            return BookingMapper.toBookingDtoOut(booking);
         }
-        throw new NullObjectException("Пользователь c id = " + userId
+        throw new NullObjectException("Пользователь c id = " + ownerId
                 + " не является хозяином вещи!");
     }
 
@@ -92,8 +95,9 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDtoOut> getBookingsByBookerId(Integer bookerId, String state) {
-        List<Booking> bookings = new ArrayList<>();
+    public List<BookingDtoOut> getBookingsByBookerId(Integer bookerId, Integer from,
+                                                     Integer size, String state) {
+        List<Booking> bookings;
         switch (stateToEnum(state)) {
             case FUTURE:
                 bookings = bookingRepository
@@ -119,8 +123,11 @@ public class BookingServiceImpl implements BookingService {
                         BookingState.REJECTED);
                 break;
             default:
+                Sort sort = Sort.by(Sort.Direction.ASC, "start");
+                int startPage = from / size;
+                Pageable page = PageRequest.of(startPage, size, sort);
                 bookings = bookingRepository
-                        .findBookingByBookerIdOrderByStartDesc(bookerId);
+                        .findBookingByBookerIdOrderByStartDesc(bookerId, page).toList();
                 break;
         }
         if (bookings.size() == 0) {
@@ -131,9 +138,10 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDtoOut> getBookingsByOwnerId(Integer ownerId, String state)
+    public List<BookingDtoOut> getBookingsByOwnerId(Integer ownerId, Integer from,
+                                                    Integer size, String state)
             throws UnsupportedStatusException {
-        List<Booking> bookings = new ArrayList<>();
+        List<Booking> bookings;
         switch (stateToEnum(state)) {
             case FUTURE:
                 bookings = bookingRepository.findAllBookingByOwnerFuture(ownerId);
@@ -157,7 +165,10 @@ public class BookingServiceImpl implements BookingService {
                         BookingState.REJECTED);
                 break;
             default:
-                bookings = bookingRepository.findAllBookingByOwner(ownerId);
+                Sort sort = Sort.by(Sort.Direction.ASC, "start");
+                int startPage = from / size;
+                Pageable page = PageRequest.of(startPage, size, sort);
+                bookings = bookingRepository.findAllBookingByOwner(ownerId, page).toList();
                 break;
         }
         if (bookings.size() == 0) {
