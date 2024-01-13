@@ -123,9 +123,7 @@ public class BookingServiceImpl implements BookingService {
                         BookingState.REJECTED);
                 break;
             default:
-                Sort sort = Sort.by(Sort.Direction.ASC, "start");
-                int startPage = from / size;
-                Pageable page = PageRequest.of(startPage, size, sort);
+                Pageable page = bookingsToPage(from, size);
                 bookings = bookingRepository
                         .findBookingByBookerIdOrderByStartDesc(bookerId, page).toList();
                 break;
@@ -165,9 +163,7 @@ public class BookingServiceImpl implements BookingService {
                         BookingState.REJECTED);
                 break;
             default:
-                Sort sort = Sort.by(Sort.Direction.ASC, "start");
-                int startPage = from / size;
-                Pageable page = PageRequest.of(startPage, size, sort);
+                Pageable page = bookingsToPage(from, size);
                 bookings = bookingRepository.findAllBookingByOwner(ownerId, page).toList();
                 break;
         }
@@ -176,6 +172,12 @@ public class BookingServiceImpl implements BookingService {
                     + ownerId + " не найдено!");
         }
         return BookingMapper.toListBookingDtoOut(bookings);
+    }
+
+    private  Pageable bookingsToPage(Integer from, Integer size) {
+        Sort sort = Sort.by(Sort.Direction.ASC, "start");
+        int startPage = from / size;
+        return PageRequest.of(startPage, size, sort);
     }
 
     private BookingState stateToEnum(String state) {

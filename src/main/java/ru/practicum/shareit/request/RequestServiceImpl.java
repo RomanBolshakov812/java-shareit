@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.EntityNullException;
 import ru.practicum.shareit.request.dto.RequestDtoIn;
 import ru.practicum.shareit.request.dto.RequestDtoOut;
+import ru.practicum.shareit.request.dto.RequestDtoWithItems;
 import ru.practicum.shareit.request.mapper.RequestMapper;
 import ru.practicum.shareit.request.model.Request;
 import ru.practicum.shareit.user.UserRepository;
@@ -32,16 +33,16 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public RequestDtoOut getRequest(Integer requestId, Integer sharerId) {
+    public RequestDtoWithItems getRequest(Integer requestId, Integer sharerId) {
         User requestor = userRepository.getUserById(sharerId).orElseThrow(() ->
                 new EntityNullException("Пользователь с id = " + sharerId + " не найден!"));
         Request request = requestRepository.findById(requestId).orElseThrow(() ->
                 new EntityNullException("Запрос с id = " + requestId + " не найден!"));
-        return RequestMapper.toRequestDtoOut(request);
+        return RequestMapper.toRequestDtoWithItems(request);
     }
 
     @Override
-    public List<RequestDtoOut> getRequestsByRequestorId(Integer requestorId,
+    public List<RequestDtoWithItems> getRequestsByRequestorId(Integer requestorId,
                                                         Integer from, Integer size) {
         userRepository.getUserById(requestorId).orElseThrow(() ->
                 new EntityNullException("Передан неверный id пользователя: id = "
@@ -54,7 +55,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public List<RequestDtoOut> getRequestsOtherUsers(Integer requestorId,
+    public List<RequestDtoWithItems> getRequestsOtherUsers(Integer requestorId,
                                                      Integer from, Integer size) {
         Sort sort = Sort.by(Sort.Direction.ASC, "created");
         Pageable page = PageRequest.of(from, size, sort);

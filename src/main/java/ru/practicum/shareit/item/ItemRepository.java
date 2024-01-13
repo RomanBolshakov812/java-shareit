@@ -12,4 +12,6 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
     List<Item> findItemByOwnerIdOrderById(Integer ownerId);
 
     List<Item> findByDescriptionContainingIgnoreCaseAndAvailable(String text, boolean available);
+
+    List<Item> findItemByRequestId(Integer requestId);
 }

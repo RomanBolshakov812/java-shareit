@@ -5,9 +5,17 @@ import java.util.List;
 import ru.practicum.shareit.item.dto.ItemByRequestDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.model.Request;
 
 public class ItemMapper {
     public static ItemDto toItemDto(Item item) {
+        Integer requestId;
+        Request request = item.getRequest();
+        if (request != null) {
+            requestId = request.getId();
+        } else {
+            requestId = null;
+        }
         return new ItemDto(
                 item.getId(),
                 item.getName(),
@@ -16,18 +24,18 @@ public class ItemMapper {
                 null,
                 null,
                 null,
-                item.getRequestId()
+                requestId
         );
     }
 
-    public static Item toItem(ItemDto itemDto, Integer itemOwner) {
+    public static Item toItem(ItemDto itemDto, Integer itemOwner, Request request) {
         Item item = new Item();
         item.setId(itemDto.getId());
         item.setName(itemDto.getName());
         item.setDescription(itemDto.getDescription());
         item.setAvailable(itemDto.getAvailable());
         item.setOwnerId(itemOwner);
-        item.setRequestId(itemDto.getRequestId());
+        item.setRequest(request);
         return item;
     }
 
@@ -45,7 +53,7 @@ public class ItemMapper {
                 item.getName(),
                 item.getDescription(),
                 item.getAvailable(),
-                item.getRequestId()
+                item.getRequest().getId()
         );
     }
 

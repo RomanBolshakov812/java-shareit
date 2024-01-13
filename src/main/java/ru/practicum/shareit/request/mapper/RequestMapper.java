@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.request.dto.RequestDtoIn;
 import ru.practicum.shareit.request.dto.RequestDtoOut;
+import ru.practicum.shareit.request.dto.RequestDtoWithItems;
 import ru.practicum.shareit.request.model.Request;
 import ru.practicum.shareit.user.model.User;
 
@@ -32,6 +33,14 @@ public class RequestMapper {
         return new RequestDtoOut(
                 request.getId(),
                 request.getDescription(),
+                request.getCreated()
+        );
+    }
+
+    public static RequestDtoWithItems toRequestDtoWithItems(Request request) {
+        return new RequestDtoWithItems(
+                request.getId(),
+                request.getDescription(),
                 request.getCreated(),
                 ItemMapper.toListItemsByRequestDto(request.getItems())
         );
@@ -45,7 +54,7 @@ public class RequestMapper {
         return requestsDto;
     }
 
-    public static Page<RequestDtoOut> toPageRequestDto(Page<Request> requests) {
-        return requests.map(RequestMapper::toRequestDtoOut);
+    public static Page<RequestDtoWithItems> toPageRequestDto(Page<Request> requests) {
+        return requests.map(RequestMapper::toRequestDtoWithItems);
     }
 }

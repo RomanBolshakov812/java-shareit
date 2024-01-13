@@ -4,6 +4,7 @@ import javax.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.practicum.shareit.request.model.Request;
 
 @Data
 @Entity
@@ -28,6 +29,7 @@ public class Item {
     @Column(name = "owner_id")
     private Integer ownerId;
 
-    @Column(name = "request_id")
-    private Integer requestId;
+    @ManyToOne
+    @JoinColumn(name = "request_id")
+    private Request request;
 }

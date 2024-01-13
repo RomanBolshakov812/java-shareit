@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.RequestDtoIn;
 import ru.practicum.shareit.request.dto.RequestDtoOut;
+import ru.practicum.shareit.request.dto.RequestDtoWithItems;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,13 +24,13 @@ public class RequestController {
     }
 
     @GetMapping("/{requestId}")
-    public RequestDtoOut getRequest(@PathVariable Integer requestId,
-                           @RequestHeader("X-Sharer-User-Id") Integer sharerId) {
+    public RequestDtoWithItems getRequest(@PathVariable Integer requestId,
+                                          @RequestHeader("X-Sharer-User-Id") Integer sharerId) {
         return service.getRequest(requestId, sharerId);
     }
 
     @GetMapping
-    public List<RequestDtoOut> getRequestByRequestorId(
+    public List<RequestDtoWithItems> getRequestByRequestorId(
             @RequestHeader("X-Sharer-User-Id") Integer requestorId,
             @RequestParam(value = "from", defaultValue = "0") @Min(0) Integer from,
             @RequestParam(value = "size", defaultValue = "20") @Min(1) @Max(20) Integer size) {
@@ -37,7 +38,7 @@ public class RequestController {
     }
 
     @GetMapping("/all")
-    public List<RequestDtoOut> getRequestsByOtherUsers(
+    public List<RequestDtoWithItems> getRequestsByOtherUsers(
             @RequestHeader("X-Sharer-User-Id") Integer requestorId,
             @RequestParam(value = "from", defaultValue = "0") @Min(0) Integer from,
             @RequestParam(value = "size", defaultValue = "20") @Min(1) @Max(20) Integer size) {
