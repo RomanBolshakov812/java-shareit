@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +15,10 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 import java.time.LocalDateTime;
+import java.time.Month;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
@@ -29,253 +32,361 @@ class BookingRepositoryTest {
     private ItemRepository itemRepository;
     @Autowired
     private UserRepository userRepository;
+    private User user1;
+    private User user2;
+    private User user3;
+    private User user4;
+    private Item item1;
+    private Item item2;
+    private Booking booking1Past;
+    private Booking booking2Past;
+    private Booking booking3Current;
+    private Booking booking4Current;
+    private Booking booking5Future;
+    private Booking booking6Future;
+    private Booking booking7Future;
 
     @BeforeEach
     public void BeforeEach() {
-        User user1 = userRepository
+        user1 = userRepository
                 .save(new User(null, "Василий", "vasya@mail.ru"));
-        User user2 = userRepository
+        user2 = userRepository
                 .save(new User(null, "Габриэлла", "gabi@mail.ru"));
-        User user3 = userRepository
+        user3 = userRepository
                 .save(new User(null, "Шандр", "shsh@mail.ru"));
-        User user4 = userRepository
+        user4 = userRepository
                 .save(new User(null, "Зинка", "zinka@mail.ru"));
-        Item item1 = itemRepository
+        item1 = itemRepository
                 .save(new Item(null, "Дрель", "Дрель аккумуляторная",
                         true, user2.getId(), null));
-        Item item2 = itemRepository
+        item2 = itemRepository
                 .save(new Item(null, "Пила", "Пилит все",
                         true, user2.getId(), null));
-        Booking booking1Past = bookingRepository.save(new Booking(null,
-                LocalDateTime.now().minusDays(5),
-                LocalDateTime.now().minusDays(3),
-                item1, user1, BookingState.WAITING));
-        Booking booking2Current = bookingRepository.save(new Booking(null,
-                LocalDateTime.now().minusDays(3),
-                LocalDateTime.now().plusDays(2),
-                item1, user1, BookingState.APPROVED));
-        Booking booking3Current = bookingRepository.save(new Booking(null,
-                LocalDateTime.now().minusDays(2),
-                LocalDateTime.now().plusDays(3),
-                item2, user3, BookingState.APPROVED));
-        Booking booking4Future = bookingRepository.save(new Booking(null,
-                LocalDateTime.now().plusDays(5),
-                LocalDateTime.now().plusDays(6),
-                item2, user3, BookingState.REJECTED));
-        Booking booking5Past = bookingRepository.save(new Booking(null,
+        booking1Past = bookingRepository.save(new Booking(null,
                 LocalDateTime.now().minusDays(6),
                 LocalDateTime.now().minusDays(1),
                 item2, user4, BookingState.CANCELED));
-        Booking booking6Future = bookingRepository.save(new Booking(null,
+        booking2Past = bookingRepository.save(new Booking(null,
+                LocalDateTime.now().minusDays(5),
+                LocalDateTime.now().minusDays(3),
+                item1, user1, BookingState.WAITING));
+        booking3Current = bookingRepository.save(new Booking(null,
+                LocalDateTime.now().minusDays(3),
+                LocalDateTime.now().plusDays(2),
+                item1, user1, BookingState.APPROVED));
+        booking4Current = bookingRepository.save(new Booking(null,
+                LocalDateTime.now().minusDays(2),
+                LocalDateTime.now().plusDays(3),
+                item2, user3, BookingState.APPROVED));
+        booking5Future = bookingRepository.save(new Booking(null,
+                LocalDateTime.now().plusDays(5),
+                LocalDateTime.now().plusDays(6),
+                item2, user3, BookingState.REJECTED));
+        booking6Future = bookingRepository.save(new Booking(null,
                 LocalDateTime.now().plusDays(6),
                 LocalDateTime.now().plusDays(8),
                 item1, user4, BookingState.APPROVED));
-        Booking booking7Future = bookingRepository.save(new Booking(null,
+        booking7Future = bookingRepository.save(new Booking(null,
                 LocalDateTime.now().plusDays(7),
                 LocalDateTime.now().plusDays(9),
                 item1, user4, BookingState.WAITING));
     }
 
-    @Test
-    public void getBookingByIdTest() {
-        Optional<Booking> bookingTest = bookingRepository.getBookingById(1);
-        assertEquals(1, bookingTest.get().getId());
-    }
-
     // ALL для букера
     @Test
     public  void findBookingByBookerIdOrderByStartDescTest() {
+        List<Booking> expectedBookings
+                = new ArrayList<>(Arrays.asList(booking3Current, booking2Past));
+
         Pageable page = PageRequest.of(0, 2);
-        List<Booking> bookingsByBooker1 = bookingRepository
+        List<Booking> actualBookings = bookingRepository
                 .findBookingByBookerIdOrderByStartDesc(1, page).toList();
-        assertEquals(2, bookingsByBooker1.size());
-        assertEquals(2, bookingsByBooker1.get(0).getId());
-        assertEquals(1, bookingsByBooker1.get(1).getId());
-        List<Booking> bookingsByBooker3 = bookingRepository
-                .findBookingByBookerIdOrderByStartDesc(3, page).toList();
-        assertEquals(2, bookingsByBooker3.size());
-        assertEquals(4, bookingsByBooker3.get(0).getId());
-        assertEquals(3, bookingsByBooker3.get(1).getId());
+
+        assertEquals(expectedBookings, actualBookings);
     }
 
     // ALL для хозяина вещей
     @Test
     public void findAllBookingByOwnerTest() {
+        List<Booking> expectedBookings = new ArrayList<>(Arrays.asList(
+                booking7Future,
+                booking6Future,
+                booking5Future,
+                booking4Current,
+                booking3Current,
+                booking2Past,
+                booking1Past));
         Pageable page = PageRequest.of(0, 7);
-        List<Booking> bookingsByOwner = bookingRepository
+
+        List<Booking> actualBookings = bookingRepository
                 .findAllBookingByOwner(2, page).toList();
-        assertEquals(7, bookingsByOwner.size());
-        assertEquals(7, bookingsByOwner.get(0).getId());
-        assertEquals(5, bookingsByOwner.get(6).getId());
-        assertEquals(3, bookingsByOwner.get(3).getId());
+
+        assertEquals(expectedBookings, actualBookings);
     }
 
     // FUTURE для букера
     @Test
-    public void findBookingByBookerIdAndStartAfterOrderByStartDescTest() {
-        List<Booking> bookings = bookingRepository
-                .findBookingByBookerIdAndStartAfterOrderByStartDesc(3, LocalDateTime.now());
-        assertEquals(1, bookings.size());
-        assertEquals(4, bookings.get(0).getId());
+    public void findAllBookingsByBookerFutureTest() {
+        List<Booking> expectedBookings = new ArrayList<>(Arrays.asList(
+                booking7Future,
+                booking6Future));
+        Pageable page = PageRequest.of(0, 2);
+
+        List<Booking> actualBookings = bookingRepository
+                .findBookingByBookerIdAndStartAfterOrderByStartDesc(4,
+                        LocalDateTime.now(), page).toList();
+
+        assertEquals(expectedBookings, actualBookings);
     }
 
     // FUTURE для хозяина вещей
     @Test
-    public void findAllBookingByOwnerFutureTest() {
-        List<Booking> bookings = bookingRepository
-                .findAllBookingByOwnerFuture(2);
-        assertEquals(3, bookings.size());
-        assertEquals(7, bookings.get(0).getId());
-        assertEquals(6, bookings.get(1).getId());
-        assertEquals(4, bookings.get(2).getId());
+    public void findAllBookingsByOwnerFutureTest() {
+        List<Booking> expectedBookings = new ArrayList<>(Arrays.asList(
+                booking7Future,
+                booking6Future,
+                booking5Future));
+        Pageable page = PageRequest.of(0, 3);
+
+        List<Booking> actualBookings = bookingRepository
+                .findAllBookingsByOwnerFuture(2, page).toList();
+
+        assertEquals(expectedBookings, actualBookings);
     }
 
     // CURRENT для букера
     @Test
     public void findAllBookingByBookerIdCurrentTest() {
-        List<Booking> bookings = bookingRepository
-                .findAllBookingByBookerIdCurrent(1);
-        assertEquals(1, bookings.size());
-        assertEquals(2, bookings.get(0).getId());
+        List<Booking> expectedBookings = new ArrayList<>(List.of(booking4Current));
+        Pageable page = PageRequest.of(0, 1);
+
+        List<Booking> actualBookings = bookingRepository
+                .findAllBookingByBookerCurrent(3, page).toList();
+
+        assertEquals(expectedBookings, actualBookings);
     }
 
     // CURRENT для хозяина вещей
     @Test
     public void findAllBookingByOwnerIdCurrentTest() {
-        List<Booking> bookings = bookingRepository
-                .findAllBookingByOwnerIdCurrent(2);
-        assertEquals(2, bookings.size());
-        assertEquals(3, bookings.get(0).getId());
-        assertEquals(2, bookings.get(1).getId());
+        List<Booking> expectedBookings = new ArrayList<>(Arrays.asList(
+                booking4Current,
+                booking3Current));
+        Pageable page = PageRequest.of(0, 2);
+
+        List<Booking> actualBookings = bookingRepository
+                .findAllBookingByOwnerCurrent(2, page).toList();
+
+        assertEquals(expectedBookings, actualBookings);
     }
 
     // PAST для букера
     @Test
     public void findAllBookingByBookerPastTest() {
-        List<Booking> bookings1 = bookingRepository
-                .findAllBookingByBookerPast(1);
-        assertEquals(1, bookings1.size());
-        assertEquals(1, bookings1.get(0).getId());
-        List<Booking> bookings3 = bookingRepository
-                .findAllBookingByBookerPast(3);
-        assertEquals(0, bookings3.size());
+        List<Booking> expectedBookings = new ArrayList<>(List.of(booking2Past));
+        Pageable page = PageRequest.of(0, 1);
+
+        List<Booking> actualBookings = bookingRepository
+                .findAllBookingByBookerPast(1, page).toList();
+
+        assertEquals(expectedBookings, actualBookings);
     }
 
     // PAST для хозяина вещей
     @Test
     public void findAllBookingByOwnerPastTest() {
-        List<Booking> bookings1 = bookingRepository
-                .findAllBookingByOwnerPast(2);
-        assertEquals(2, bookings1.size());
-        assertEquals(1, bookings1.get(0).getId());
-        assertEquals(5, bookings1.get(1).getId());
+        List<Booking> expectedBookings = new ArrayList<>(Arrays.asList(
+                booking2Past,
+                booking1Past));
+        Pageable page = PageRequest.of(0, 2);
+
+        List<Booking> actualBookings = bookingRepository
+                .findAllBookingByOwnerPast(2, page).toList();
+
+        assertEquals(expectedBookings, actualBookings);
     }
 
     // WAITING, APPROVED, REJECTED, CANCELLED для букера
     @Test
-    public void findBookingOfBookerByStatusTest() {
-        List<Booking> bookings1Waiting = bookingRepository
-                .findBookingOfBookerByStatus(1, BookingState.WAITING);
-        assertEquals(1, bookings1Waiting.size());
-        assertEquals(1, bookings1Waiting.get(0).getId());
+    public void findBookingOfBookerByStatus_whenWaitingForUser1_thenReturnedBooking2() {
+        List<Booking> expectedBookings = new ArrayList<>(List.of(booking2Past));
+        Pageable page = PageRequest.of(0, 1);
 
-        List<Booking> bookings1Approved = bookingRepository
-                .findBookingOfBookerByStatus(1, BookingState.APPROVED);
-        assertEquals(1, bookings1Approved.size());
-        assertEquals(2, bookings1Approved.get(0).getId());
+        List<Booking> actualBookings = bookingRepository
+                .findBookingOfBookerByStatus(1, BookingState.WAITING, page).toList();
 
-        List<Booking> bookings3Approved = bookingRepository
-                .findBookingOfBookerByStatus(3, BookingState.APPROVED);
-        assertEquals(1, bookings3Approved.size());
+        assertEquals(expectedBookings, actualBookings);
+    }
 
-        List<Booking> bookings3Rejected = bookingRepository
-                .findBookingOfBookerByStatus(3, BookingState.REJECTED);
-        assertEquals(1, bookings3Rejected.size());
-        assertEquals(4, bookings3Rejected.get(0).getId());
+    @Test
+    public void findBookingOfBookerByStatus_whenApprovedForUser3_thenReturnedBooking4() {
+        List<Booking> expectedBookings = new ArrayList<>(List.of(booking4Current));
+        Pageable page = PageRequest.of(0, 1);
 
-        List<Booking> bookings4Waiting = bookingRepository
-                .findBookingOfBookerByStatus(4, BookingState.WAITING);
-        assertEquals(1, bookings4Waiting.size());
-        assertEquals(7, bookings4Waiting.get(0).getId());
+        List<Booking> actualBookings = bookingRepository
+                .findBookingOfBookerByStatus(3, BookingState.APPROVED, page).toList();
 
-        List<Booking> bookings4Cancelled = bookingRepository
-                .findBookingOfBookerByStatus(4, BookingState.CANCELED);
-        assertEquals(1, bookings4Cancelled.size());
-        assertEquals(5, bookings4Cancelled.get(0).getId());
+        assertEquals(expectedBookings, actualBookings);
+    }
+
+    @Test
+    public void findBookingOfBookerByStatus_whenRejectedForUser3_thenReturnedBooking5() {
+        List<Booking> expectedBookings = new ArrayList<>(List.of(booking5Future));
+        Pageable page = PageRequest.of(0, 1);
+
+        List<Booking> actualBookings = bookingRepository
+                .findBookingOfBookerByStatus(3, BookingState.REJECTED, page).toList();
+
+        assertEquals(expectedBookings, actualBookings);
+    }
+
+    @Test
+    public void findBookingOfBookerByStatus_whenCancelledForUser4_thenReturnedBooking1() {
+        List<Booking> expectedBookings = new ArrayList<>(List.of(booking1Past));
+        Pageable page = PageRequest.of(0, 1);
+
+        List<Booking> actualBookings = bookingRepository
+                .findBookingOfBookerByStatus(4, BookingState.CANCELED, page).toList();
+
+        assertEquals(expectedBookings, actualBookings);
     }
 
     // WAITING, APPROVED, REJECTED, CANCELLED для хозяина вещей
     @Test
-    public void findBookingOfOwnerByStatusTest() {
-        List<Booking> bookingsWaiting = bookingRepository
-                .findBookingOfOwnerByStatus(2, BookingState.WAITING);
-        assertEquals(2, bookingsWaiting.size());
-        assertEquals(7, bookingsWaiting.get(0).getId());
-        assertEquals(1, bookingsWaiting.get(1).getId());
+    public void findBookingOfOwnerByStatus_whenWaitingForUser2_thenReturnedBookings7And2() {
+        List<Booking> expectedBookings = new ArrayList<>(Arrays.asList(
+                booking7Future,
+                booking2Past));
+        Pageable page = PageRequest.of(0, 2);
 
-        List<Booking> bookingsApproved = bookingRepository
-                .findBookingOfOwnerByStatus(2, BookingState.APPROVED);
-        assertEquals(3, bookingsApproved.size());
-        assertEquals(6, bookingsApproved.get(0).getId());
-        assertEquals(3, bookingsApproved.get(1).getId());
-        assertEquals(2, bookingsApproved.get(2).getId());
+        List<Booking> actualBookings = bookingRepository
+                .findBookingOfOwnerByStatus(2, BookingState.WAITING, page).toList();
 
-        List<Booking> bookingsRejected = bookingRepository
-                .findBookingOfOwnerByStatus(2, BookingState.REJECTED);
-        assertEquals(1, bookingsRejected.size());
-        assertEquals(4, bookingsRejected.get(0).getId());
+        assertEquals(expectedBookings, actualBookings);
+    }
 
-        List<Booking> bookingsCancelled = bookingRepository
-                .findBookingOfOwnerByStatus(2, BookingState.CANCELED);
-        assertEquals(1, bookingsCancelled.size());
-        assertEquals(5, bookingsCancelled.get(0).getId());
+    @Test
+    public void findBookingOfOwnerByStatus_whenApprovedForUser2_thenReturnedBooking6And4And3() {
+        List<Booking> expectedBookings = new ArrayList<>(Arrays.asList(
+                booking6Future,
+                booking4Current,
+                booking3Current));
+        Pageable page = PageRequest.of(0, 3);
+
+        List<Booking> actualBookings = bookingRepository
+                .findBookingOfOwnerByStatus(2, BookingState.APPROVED, page).toList();
+
+        assertEquals(expectedBookings, actualBookings);
+    }
+
+    @Test
+    public void findBookingOfOwnerByStatus_whenRejectedForUser2_thenReturnedBooking5() {
+        List<Booking> expectedBookings = new ArrayList<>(List.of(booking5Future));
+        Pageable page = PageRequest.of(0, 1);
+
+        List<Booking> actualBookings = bookingRepository
+                .findBookingOfOwnerByStatus(2, BookingState.REJECTED, page).toList();
+
+        assertEquals(expectedBookings, actualBookings);
+    }
+
+    @Test
+    public void findBookingOfOwnerByStatus_whenCancelledForUser2_thenReturnedBooking1() {
+        List<Booking> expectedBookings = new ArrayList<>(List.of(booking1Past));
+        Pageable page = PageRequest.of(0, 1);
+
+        List<Booking> actualBookings = bookingRepository
+                .findBookingOfOwnerByStatus(2, BookingState.CANCELED, page).toList();
+
+        assertEquals(expectedBookings, actualBookings);
     }
 
     // последнее бронирование
     @Test
     public void findTopBookingByItemIdAndStartBeforeOrderByStartDescTest() {
-        Booking lastBooking = bookingRepository
+        Booking actualLastBooking = bookingRepository
                 .findTopBookingByItemIdAndStartBeforeOrderByStartDesc(2, LocalDateTime.now());
-        assertEquals(3, lastBooking.getId());
+
+        assertEquals(booking4Current, actualLastBooking);
     }
 
     // следующее бронирование
     @Test
     public void findTopBookingByItemIdAndStartAfterOrderByStartTest() {
-        Booking lastBooking = bookingRepository
+        Booking actualLastBooking = bookingRepository
                 .findTopBookingByItemIdAndStartAfterOrderByStart(1, LocalDateTime.now());
-        assertEquals(6, lastBooking.getId());
+
+        assertEquals(booking6Future, actualLastBooking);
     }
 
     // даты окончаний бронирований букера
     @Test
     public void getListBookingEndDateTest() {
-        List<LocalDateTime> endDates = bookingRepository.getListBookingEndDate(1, 1);
-        assertEquals(2, endDates.size());
+        bookingRepository.delete(booking2Past);
+        bookingRepository.delete(booking3Current);
+        LocalDateTime currentDateTame =
+                LocalDateTime.of(2124, Month.APRIL, 1, 1, 1);
+        Booking booking8 = new Booking(null, currentDateTame.minusDays(2),
+                currentDateTame.plusDays(1), item1, user1, BookingState.APPROVED);
+        Booking booking9 = new Booking(null, currentDateTame.minusDays(1),
+                currentDateTame.plusDays(2), item1, user1, BookingState.APPROVED);
+        bookingRepository.save(booking8);
+        bookingRepository.save(booking9);
+        List<LocalDateTime> expectedDatesList = new ArrayList<>(Arrays.asList(
+                booking8.getEnd(),
+                booking9.getEnd()));
+
+        List<LocalDateTime> actualDatesList = bookingRepository
+                .getListBookingEndDate(1, 1);
+
+        assertEquals(expectedDatesList, actualDatesList);
     }
 
-    // Проверка на непересечение броней
+    // НЕПЕРЕСЕЧЕНИЕ БРОНЕЙ
+    // start попадает в другое бронирование
     @Test
-    public void findOverlapsBookingsTest() {
-        // имеется start в запрашиваемом промежутке
-        boolean isOverlaidStart = bookingRepository
+    public void findOverlapsBookings_whenStartFallsInAnotherDiapason_thenReturnedTrue() {
+        boolean startIsOverlaid = bookingRepository
                 .findOverlapsBookings(2, LocalDateTime.now().minusDays(3),
                         LocalDateTime.now());
-        // имеется end в запрашиваемом промежутке
-        boolean isOverlaidEnd = bookingRepository
+
+        assertTrue(startIsOverlaid);
+    }
+
+    // end попадает в другое бронирование
+    @Test
+    public void findOverlapsBookings_EndFallsInAnotherBooking_thenReturnedTrue() {
+        boolean endIsOverlaid = bookingRepository
                 .findOverlapsBookings(1, LocalDateTime.now(),
-                        LocalDateTime.now().plusDays(3));
-        // запрашиваемый промежуток полностью поглощает имеющееся бронирование
-        boolean isOverlaidInside = bookingRepository
-                .findOverlapsBookings(1, LocalDateTime.now().plusDays(5),
-                        LocalDateTime.now().plusDays(9));
-        // пересечение с не APPROVED бронированием
+                        LocalDateTime.now().plusDays(7));
+
+        assertTrue(endIsOverlaid);
+    }
+
+    // запрашиваемое бронирование полностью перекрывает другое бронирование
+    @Test
+    public void findOverlapsBookings_BookingFullyOverlapsAnotherBooking_thenReturnedTrue() {
+        boolean isOverlaidOutside = bookingRepository
+                .findOverlapsBookings(2, LocalDateTime.now().plusDays(1),
+                        LocalDateTime.now().plusDays(4));
+
+        assertTrue(isOverlaidOutside);
+    }
+
+    // пересечение с REJECTED бронированием
+    @Test
+    public void findOverlapsBookings_BookingOverlapsWithRejectedBooking_thenReturnedFalse() {
         boolean notOverlaid = bookingRepository
                 .findOverlapsBookings(2, LocalDateTime.now().plusDays(4),
                         LocalDateTime.now().plusDays(6));
-        assertTrue(isOverlaidStart);
-        assertTrue(isOverlaidEnd);
-        assertTrue(isOverlaidInside);
+
         assertFalse(notOverlaid);
+    }
+
+    @AfterEach
+    public void deleteBooking() {
+        bookingRepository.deleteAll();
+        itemRepository.deleteAll();
+        userRepository.deleteAll();
     }
 }

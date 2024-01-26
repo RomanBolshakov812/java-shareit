@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,10 +8,10 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.UserRepository;
-import ru.practicum.shareit.user.model.User;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
@@ -20,46 +21,43 @@ class ItemRepositoryTest {
 
     @Autowired
     private ItemRepository itemRepository;
-    @Autowired
-    private UserRepository userRepository;
+    private Item item1;
+    private Item item2;
+    private Item item3;
 
     @BeforeEach
     public void BeforeEach() {
+        item1 = itemRepository.save(new Item(null, "Шуруповерт",
+                "С аккумулятором",true, 1, null));
 
-        User user1 = userRepository
-                .save(new User(null, "Василий", "vasya@mail.ru"));
-        User user2 = userRepository
-                .save(new User(null, "Габриэлла", "gabi@mail.ru"));
-        User user3 = userRepository
-                .save(new User(null, "Шандр", "shsh@mail.ru"));
+        item2 = itemRepository.save(new Item(null, "Пила",
+                "Пилит все, без АККУМУЛЯТОРА",true, 1, null));
 
-        Item item1 = itemRepository
-                .save(new Item(null, "Шуруповерт", "С аккумулятором",
-                        true, user1.getId(), null));
-        Item item2 = itemRepository
-                .save(new Item(null, "Пила", "Пилит все, без АККУМУЛЯТОРА",
-                        true, user1.getId(), null));
-        Item item3 = itemRepository
-                .save(new Item(null, "Метла", "По металлу, АККУМУЛЯТОРНАЯ",
-                        false, user2.getId(), null));
+        item3 = itemRepository.save(new Item(null, "Метла",
+                "По металлу, АККУМУЛЯТОРНАЯ",true, 2, null));
     }
 
     @Test
-    public void getItemByIdTest() {
-        Optional<Item> item = itemRepository.getItemById(1);
-        assertEquals(1, item.get().getId());
-    }
+    public  void findAllItemsByOwnerIdOrderById() {
+        List<Item> expectedItems = new ArrayList<>(Arrays.asList(item1, item2));
 
-    @Test
-    public  void findItemByOwnerIdOrderByIdTest() {
-        List<Item> items = itemRepository.findItemByOwnerIdOrderById(1);
-        assertEquals(2, items.size());
-        assertEquals(1, items.get(0).getId());
+        List<Item> actualItems = itemRepository.findAllItemsByOwnerIdOrderById(1);
+
+       assertEquals(expectedItems, actualItems);
     }
 
     @Test
     public void findByDescriptionContainingIgnoreCaseAndAvailableTest() {
-        List<Item> items = itemRepository
-                .findByDescriptionContainingIgnoreCaseAndAvailable("аККумул", true);
+        List<Item> expectedItems = new ArrayList<>(Collections.singletonList(item3));
+
+        List<Item> actualItems = itemRepository
+                .findByDescriptionContainingIgnoreCaseAndAvailable("мЕТалл", true);
+
+        assertEquals(expectedItems, actualItems);
+    }
+
+    @AfterEach
+    public void deleteAll() {
+        itemRepository.deleteAll();
     }
 }

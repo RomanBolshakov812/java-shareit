@@ -37,10 +37,10 @@ public class BookingServiceImpl implements BookingService {
         if (end.isBefore(start) || start.equals(end)) {
             throw new ValidationException("Неверные даты бронирования!");
         }
-        User booker = userRepository.getUserById(bookerId).orElseThrow(() ->
+        User booker = userRepository.findById(bookerId).orElseThrow(() ->
                 new EntityNullException("Пользователь с id = " + bookerId + " не найден!"));
-        Item item = itemRepository.getItemById(itemId).orElseThrow(() ->
-                new EntityNullException("Вещь с id = " + bookerId + " не найдена!"));
+        Item item = itemRepository.findById(itemId).orElseThrow(() ->
+                new EntityNullException("Вещь с id = " + itemId + " не найдена!"));
         if (!item.getAvailable()) {
             throw new ValidationException("Данная вещь недоступна!");
         }
@@ -64,7 +64,7 @@ public class BookingServiceImpl implements BookingService {
         } else {
             state = BookingState.REJECTED;
         }
-        Booking booking = bookingRepository.getBookingById(bookingId).orElseThrow(() ->
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->
                 new EntityNullException("Бронирование с id = " + bookingId + " не найдено!"));
         Item item = booking.getItem();
         if (Objects.equals(item.getOwnerId(), ownerId)) {
@@ -82,7 +82,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDtoOut getBooking(Integer bookingId, Integer sharerId) {
-        Booking booking = bookingRepository.getBookingById(bookingId)
+        Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new EntityNullException("Бронирование с id = "
                         + bookingId + " не найдено!"));
         if (!Objects.equals(booking.getBooker().getId(), sharerId)) {
@@ -98,32 +98,32 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingDtoOut> getBookingsByBookerId(Integer bookerId, Integer from,
                                                      Integer size, String state) {
         List<Booking> bookings;
+        Pageable page = bookingsToPage(from, size);
         switch (stateToEnum(state)) {
             case FUTURE:
                 bookings = bookingRepository
                         .findBookingByBookerIdAndStartAfterOrderByStartDesc(bookerId,
-                                LocalDateTime.now());
+                                LocalDateTime.now(), page).toList();
                 break;
             case CURRENT:
-                bookings = bookingRepository.findAllBookingByBookerIdCurrent(bookerId);
+                bookings = bookingRepository.findAllBookingByBookerCurrent(bookerId, page).toList();
                 break;
             case PAST:
-                bookings = bookingRepository.findAllBookingByBookerPast(bookerId);
+                bookings = bookingRepository.findAllBookingByBookerPast(bookerId, page).toList();
                 break;
             case WAITING:
                 bookings = bookingRepository.findBookingOfBookerByStatus(bookerId,
-                        BookingState.WAITING);
+                        BookingState.WAITING, page).toList();
                 break;
             case APPROVED:
                 bookings = bookingRepository.findBookingOfBookerByStatus(bookerId,
-                        BookingState.APPROVED);
+                        BookingState.APPROVED, page).toList();
                 break;
             case REJECTED:
                 bookings = bookingRepository.findBookingOfBookerByStatus(bookerId,
-                        BookingState.REJECTED);
+                        BookingState.REJECTED, page).toList();
                 break;
             default:
-                Pageable page = bookingsToPage(from, size);
                 bookings = bookingRepository
                         .findBookingByBookerIdOrderByStartDesc(bookerId, page).toList();
                 break;
@@ -140,30 +140,30 @@ public class BookingServiceImpl implements BookingService {
                                                     Integer size, String state)
             throws UnsupportedStatusException {
         List<Booking> bookings;
+        Pageable page = bookingsToPage(from, size);
         switch (stateToEnum(state)) {
             case FUTURE:
-                bookings = bookingRepository.findAllBookingByOwnerFuture(ownerId);
+                bookings = bookingRepository.findAllBookingsByOwnerFuture(ownerId, page).toList();
                 break;
             case CURRENT:
-                bookings = bookingRepository.findAllBookingByOwnerIdCurrent(ownerId);
+                bookings = bookingRepository.findAllBookingByOwnerCurrent(ownerId, page).toList();
                 break;
             case PAST:
-                bookings = bookingRepository.findAllBookingByOwnerPast(ownerId);
+                bookings = bookingRepository.findAllBookingByOwnerPast(ownerId, page).toList();
                 break;
             case WAITING:
                 bookings = bookingRepository.findBookingOfOwnerByStatus(ownerId,
-                        BookingState.WAITING);
+                        BookingState.WAITING, page).toList();
                 break;
             case APPROVED:
                 bookings = bookingRepository.findBookingOfOwnerByStatus(ownerId,
-                        BookingState.APPROVED);
+                        BookingState.APPROVED, page).toList();
                 break;
             case REJECTED:
                 bookings = bookingRepository.findBookingOfOwnerByStatus(ownerId,
-                        BookingState.REJECTED);
+                        BookingState.REJECTED, page).toList();
                 break;
             default:
-                Pageable page = bookingsToPage(from, size);
                 bookings = bookingRepository.findAllBookingByOwner(ownerId, page).toList();
                 break;
         }

@@ -2,7 +2,6 @@ package ru.practicum.shareit.booking;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,8 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.booking.model.Booking;
 
 public interface BookingRepository extends JpaRepository<Booking, Integer> {
-
-    Optional<Booking> getBookingById(Integer bookingId);
 
     // ALL для букера
     Page<Booking> findBookingByBookerIdOrderByStartDesc(Integer bookerId, Pageable pageable);
@@ -21,41 +18,44 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
     Page<Booking> findAllBookingByOwner(Integer ownerId, Pageable pageable);
 
     // FUTURE для букера
-    List<Booking> findBookingByBookerIdAndStartAfterOrderByStartDesc(Integer bookerId,
-                                                                     LocalDateTime now);
+    Page<Booking> findBookingByBookerIdAndStartAfterOrderByStartDesc(Integer bookerId,
+                                                                     LocalDateTime now,
+                                                                     Pageable pageable);
 
     // FUTURE для хозяина вещей
     @Query("select b from Booking b where b.item.ownerId = ?1 and b.start "
             + "> now() order by b.start desc")
-    List<Booking> findAllBookingByOwnerFuture(Integer ownerId);
+    Page<Booking> findAllBookingsByOwnerFuture(Integer ownerId, Pageable pageable);
 
     // CURRENT для букера
     @Query("select b from Booking b where b.booker.id = ?1 and b.start "
             + "< now() and b.end > now() order by b.start desc")
-    List<Booking> findAllBookingByBookerIdCurrent(Integer bookerId);
+    Page<Booking> findAllBookingByBookerCurrent(Integer bookerId, Pageable pageable);
 
     // CURRENT для хозяина вещей
     @Query("select b from Booking b where b.item.ownerId = ?1 and b.start "
             + "< now() and b.end > now() order by b.start desc")
-    List<Booking> findAllBookingByOwnerIdCurrent(Integer ownerId);
+    Page<Booking> findAllBookingByOwnerCurrent(Integer ownerId, Pageable pageable);
 
     // PAST для букера
     @Query("select b from Booking b where b.booker.id = ?1 and b.end < now() order by b.start desc")
-    List<Booking> findAllBookingByBookerPast(Integer bookerId);
+    Page<Booking> findAllBookingByBookerPast(Integer bookerId, Pageable pageable);
 
     // PAST для хозяина вещей
     @Query("select b from Booking b where b.item.ownerId = ?1 and b.end "
             + "< now() order by b.start desc")
-    List<Booking> findAllBookingByOwnerPast(Integer ownerId);
+    Page<Booking> findAllBookingByOwnerPast(Integer ownerId, Pageable pageable);
 
     // WAITING, APPROVED, REJECTED, CANCELLED для букера
     @Query("select b from Booking b where b.booker.id = ?1 and b.status = ?2 order by b.start desc")
-    List<Booking> findBookingOfBookerByStatus(Integer bookerId, BookingState status);
+    Page<Booking> findBookingOfBookerByStatus(Integer bookerId, BookingState status,
+                                              Pageable pageable);
 
     // WAITING, APPROVED, REJECTED, CANCELLED для хозяина вещей
     @Query("select b from Booking b where b.item.ownerId = ?1 "
             + "and b.status = ?2 order by b.start desc")
-    List<Booking> findBookingOfOwnerByStatus(Integer ownerId, BookingState status);
+    Page<Booking> findBookingOfOwnerByStatus(Integer ownerId, BookingState status,
+                                             Pageable pageable);
 
     // последнее бронирование
     Booking findTopBookingByItemIdAndStartBeforeOrderByStartDesc(Integer itemId, LocalDateTime now);

@@ -1,55 +1,266 @@
 package ru.practicum.shareit.item;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.booking.BookingRepository;
+import ru.practicum.shareit.exception.EntityNullException;
+import ru.practicum.shareit.exception.NullObjectException;
+import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.mapper.CommentMapper;
+import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.RequestRepository;
+import ru.practicum.shareit.request.model.Request;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ItemServiceImplTest {
 
-    private ItemService itemService;
     @Mock
-    ItemRepository itemRepository;
+    private ItemRepository itemRepository;
     @Mock
     private CommentRepository commentRepository;
     @Mock
     private UserRepository userRepository;
     @Mock
     private BookingRepository bookingRepository;
-    ItemDto itemDto;
     @Mock
     private RequestRepository requestRepository;
-
-
+    private ItemService itemService;
+    private User user;
+    private Item item;
+    private ItemDto emptyItem;
+    private ItemDto itemDtoIn;
 
     @BeforeEach
     public void BeforeEach() {
         itemService = new ItemServiceImpl(itemRepository,
                 commentRepository, userRepository, bookingRepository, requestRepository);
-        Item item = new Item(1, "item1", "item1 description",
+        item = new Item(1, "item1", "item1 description",
                 true, 1, null);
-        User user = new User(1, "Василий", "vasya@mail.ru");
-        itemDto = new ItemDto(null,
-                "item1", "item1 description", true,
+        user = new User(1, "Василий", "vasya@mail.ru");
+        emptyItem = new ItemDto(null, null, null, null, null,
+                null, null, null);
+        itemDtoIn = new ItemDto(1, "item1", "item1 description", true,
                 null, null, null, null);
-        when(userRepository.getUserById(1)).thenReturn(Optional.of(user));
-        //when(itemRepository.save(Mockito.any(Item.class))).thenReturn(ItemMapper.toItem(itemDto, 1));///////////////////////////////
-    }
-/*
-    @Test
-    public void addItemTest() {
-        ItemDto itemDtoTest = itemService.addItem(this.itemDto, 1);
-        assertEquals(this.itemDto, itemDtoTest);
+
+        when(userRepository.findById(any())).thenReturn(Optional.of(user));
+        lenient().when(userRepository.findById(100)).thenReturn(Optional.empty());
+        when(itemRepository.findById(any())).thenReturn(Optional.of(item));
+        lenient().when(itemRepository.findById(100)).thenReturn(Optional.empty());
+        lenient().when(itemRepository.save(item)).thenReturn(item);
     }
 
- */
+    // ADD ITEM
+    @Test
+    void addItem_whenUserNotFound_thenEntityNullExceptionThrown() {
+        EntityNullException exception = assertThrows(EntityNullException.class,
+                () -> itemService.addItem(itemDtoIn, 100));
+
+        assertEquals("Пользователь с id = 100 не найден!", exception.getMessage());
+    }
+
+    @Test
+    void addItem_withRequest_thenReturnedItemWithRequest() {
+        User requestor = new User(2, "Петр", "petya@mail.ru");
+        Request request = new Request(1, "description", requestor,
+                LocalDateTime.now(), null);
+        ItemDto itemDtoWithRequest = new ItemDto(1,
+                "item1", "item1 description", true,
+                null, null, null, 1);
+        Item ItemToSaveInRepository = ItemMapper.toItem(itemDtoWithRequest, 1, request);
+        Item expectedItem = new Item(1, "item1", "item1 description",
+                true, 1, request);
+        when(requestRepository.findById(anyInt())).thenReturn(Optional.of(request));
+        when(itemRepository.save(ItemToSaveInRepository)).thenReturn(expectedItem);
+        ItemDto expectedItemDto = ItemMapper.toItemDto(expectedItem);
+
+        ItemDto actualItemDto = itemService.addItem(itemDtoWithRequest, 1);
+
+        assertEquals(expectedItemDto, actualItemDto);
+    }
+
+    @Test
+    void addItem_whenNonRequest_thenReturnedItemWithoutRequest() {
+        ItemDto expectedItemDto = ItemMapper.toItemDto(item);
+        when(itemRepository.save(any(Item.class))).thenReturn(item);
+
+        ItemDto actualItemDto = itemService.addItem(itemDtoIn, 1);
+
+        assertEquals(expectedItemDto, actualItemDto);
+    }
+
+    // UPDATE ITEM
+    @Test
+    void updateItem_whenItemNotFound_thenEntityNullExceptionThrown() {
+        EntityNullException exception = assertThrows(EntityNullException.class,
+                () -> itemService.updateItem(100, itemDtoIn, 1));
+
+        assertEquals("Вещь с id = 100 не найдена!", exception.getMessage());
+    }
+
+    @Test
+    void updateItem_whenUserNotFound_thenNullObjectExceptionThrown() {
+        NullObjectException exception = assertThrows(NullObjectException.class,
+                () -> itemService.updateItem(1, itemDtoIn, 2));
+
+        assertEquals("Неверный id владельца вещи!", exception.getMessage());
+    }
+
+    @Test
+    void updateItem_whenUpdateName_thenReturnedItemWithNewName() {
+        itemDtoIn = emptyItem;
+        itemDtoIn.setName("New Name");
+        Item expectedItem = new Item(1, "New Name", "item1 description",
+                true, 1, null);
+
+        ItemDto actualItemDto = itemService.updateItem(1, itemDtoIn, 1);
+
+        assertEquals(ItemMapper.toItemDto(expectedItem), actualItemDto);
+    }
+
+    @Test
+    void updateItem_whenUpdateDescription_thenReturnedItemWithNewName() {
+        itemDtoIn = emptyItem;
+        itemDtoIn.setDescription("New description");
+        Item expectedItem = new Item(1, "item1", "New description",
+                true, 1, null);
+
+        ItemDto actualItemDto = itemService.updateItem(1, itemDtoIn, 1);
+
+        assertEquals(ItemMapper.toItemDto(expectedItem), actualItemDto);
+    }
+
+    @Test
+    void updateItem_whenUpdateAvailable_thenReturnedItemWithNewName() {
+        itemDtoIn = emptyItem;
+        itemDtoIn.setAvailable(false);
+        Item expectedItem = new Item(1, "item1", "item1 description",
+                false, 1, null);
+
+        ItemDto actualItemDto = itemService.updateItem(1, itemDtoIn, 1);
+
+        assertEquals(ItemMapper.toItemDto(expectedItem), actualItemDto);
+    }
+
+    //GET ITEM
+    @Test
+    void getItemsByOwnerId() {
+        itemService.getItemsByOwnerId(1);
+
+        verify(itemRepository).findAllItemsByOwnerIdOrderById(1);
+    }
+
+    @Test
+    void getItem_whenNonNextAndLastBooking_thenReturnedInvoked() {
+        when(commentRepository.findAllCommentByItemId(anyInt())).thenReturn(List.of());
+        ItemDto expectedItemDto = ItemMapper.toItemDto(item);
+        expectedItemDto.setComments(List.of());
+
+        ItemDto actualItemDto = itemService.getItem(1, 1);
+
+        assertEquals(expectedItemDto, actualItemDto);
+    }
+
+    //SEARCH ITEM
+    @Test
+    void searchItem_whenTextIsBlank_thenReturnedEmptyList() {
+        List<ItemDto> expectedList = new ArrayList<>();
+
+        List<ItemDto> actualList = itemService.searchItem("");
+
+        assertEquals(expectedList, actualList);
+    }
+
+    @Test
+    void searchItem_whenTextIsNotBlank_thenReturnedItemsList() {
+        List<Item> items = new ArrayList<>();
+        items.add(item);
+        List<ItemDto> expectedList = new ArrayList<>();
+        expectedList.add(ItemMapper.toItemDto(item));
+        when(itemRepository
+                .findByDescriptionContainingIgnoreCaseAndAvailable(any(String.class),
+                        anyBoolean())).thenReturn(items);
+
+        List<ItemDto> actualList = itemService.searchItem("item1 de");
+
+        assertEquals(expectedList, actualList);
+    }
+
+    // ADD COMMENT
+    @Test
+    void addComment_whenItemNotFound_thenEntityNulExceptionThrown() {
+        EntityNullException exception = assertThrows(EntityNullException.class,
+                () -> itemService.addComment(null, 100, 1));
+
+        assertEquals("Вещь с id = 100 не найдена!", exception.getMessage());
+    }
+
+    @Test
+    void addComment_whenUserNotFound_thenEntityNulExceptionThrown() {
+        EntityNullException exception = assertThrows(EntityNullException.class,
+                () -> itemService.addComment(null, 1, 100));
+
+        assertEquals("Пользователь с id = 100 не найден!", exception.getMessage());
+    }
+
+    @Test
+    void addComment_whenNoBookingsForItemForItem_thenValidationExceptionThrown() {
+        when(bookingRepository.getListBookingEndDate(anyInt(), anyInt())).thenReturn(List.of());
+
+        ValidationException exception = assertThrows(ValidationException.class,
+                () -> itemService.addComment(null, 1, 1));
+
+        assertEquals("У пользователя с id = 1 нет бронирований вещи с id = 1!",
+                exception.getMessage());
+    }
+
+    @Test
+    void addComment_whenNoCompletedBookings_thenValidationExceptionThrown() {
+        List<LocalDateTime> endDateBookings = new ArrayList<>();
+        endDateBookings.add(LocalDateTime.now().plusDays(1));
+        when(bookingRepository.getListBookingEndDate(anyInt(), anyInt()))
+                .thenReturn(endDateBookings);
+
+        ValidationException exception = assertThrows(ValidationException.class,
+                () -> itemService.addComment(null, 1, 1));
+
+        assertEquals("У пользователя с id = 1 нет завершенных бронирований вещи с id = 1!",
+                exception.getMessage());
+    }
+
+    @Test
+    void addComment_whenOneBookingAvailable_thenReturnedInvoked() {
+        LocalDateTime created = LocalDateTime.now();
+        List<LocalDateTime> endDateBookings = new ArrayList<>();
+        endDateBookings.add(LocalDateTime.now());
+        ItemDto itemDto = ItemMapper.toItemDto(item);
+        when(bookingRepository.getListBookingEndDate(anyInt(), anyInt()))
+                .thenReturn(endDateBookings);
+        CommentDto commentDtoIn = new CommentDto(null, "Text", itemDto,
+                "Author Name", null);
+        Comment comment = new Comment(null, "Text", item, user, created);
+        when(commentRepository.save(any(Comment.class))).thenReturn(comment);
+        CommentDto expectedCommentDto = CommentMapper.toCommentDto(comment);
+
+        CommentDto actualCommentDto = itemService.addComment(commentDtoIn, 1, 1);
+        actualCommentDto.setCreated(created);
+
+        assertEquals(expectedCommentDto, actualCommentDto);
+    }
 }

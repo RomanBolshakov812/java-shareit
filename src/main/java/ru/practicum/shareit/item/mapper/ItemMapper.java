@@ -2,7 +2,6 @@ package ru.practicum.shareit.item.mapper;
 
 import java.util.ArrayList;
 import java.util.List;
-import ru.practicum.shareit.item.dto.ItemByRequestDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.model.Request;
@@ -23,7 +22,7 @@ public class ItemMapper {
                 item.getAvailable(),
                 null,
                 null,
-                null,
+                new ArrayList<>(),
                 requestId
         );
     }
@@ -41,30 +40,12 @@ public class ItemMapper {
 
     public static List<ItemDto> toListItemDto(List<Item> items) {
         List<ItemDto> itemsDto = new ArrayList<>();
-        for (Item item : items) {
-            itemsDto.add(toItemDto(item));
+        if (items != null) {
+            for (Item item : items) {
+                itemsDto.add(toItemDto(item));
+            }
+            return itemsDto;
         }
-        return itemsDto;
-    }
-
-    public static ItemByRequestDto toItemByRequestDto(Item item) {
-        return new ItemByRequestDto(
-                item.getId(),
-                item.getName(),
-                item.getDescription(),
-                item.getAvailable(),
-                item.getRequest().getId()
-        );
-    }
-
-    public static List<ItemByRequestDto> toListItemsByRequestDto(List<Item> items) {
-        if (items == null) {
-            return null;
-        }
-        List<ItemByRequestDto> itemsDto = new ArrayList<>();
-        for (Item item : items) {
-            itemsDto.add(toItemByRequestDto(item));
-        }
-        return itemsDto;
+        return null;
     }
 }

@@ -33,8 +33,8 @@ public class UserController {
         return userService.getAllUsers();
     }
 
-    @GetMapping("/{id}")
-    public UserDto getUser(@PathVariable Integer id) {
-        return userService.getUser(id);
+    @GetMapping("/{userId}")
+    public UserDto getUser(@PathVariable Integer userId) {
+        return userService.getUser(userId);
     }
 }
