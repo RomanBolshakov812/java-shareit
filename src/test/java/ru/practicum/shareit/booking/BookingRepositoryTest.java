@@ -15,7 +15,6 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 import java.time.LocalDateTime;
-import java.time.Month;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -325,7 +324,7 @@ class BookingRepositoryTest {
         bookingRepository.delete(booking2Past);
         bookingRepository.delete(booking3Current);
         LocalDateTime currentDateTame =
-                LocalDateTime.of(2124, Month.APRIL, 1, 1, 1);
+                LocalDateTime.parse("2124-04-01T01:01:01");
         Booking booking8 = new Booking(null, currentDateTame.minusDays(2),
                 currentDateTame.plusDays(1), item1, user1, BookingState.APPROVED);
         Booking booking9 = new Booking(null, currentDateTame.minusDays(1),

@@ -11,7 +11,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import java.time.LocalDateTime;
-import java.time.Month;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -142,8 +141,7 @@ class ItemControllerTest {
     @SneakyThrows
     @Test
     void createComment_whenCommentIsValid_thenReturnedOkStatus() {
-        LocalDateTime create = LocalDateTime.of(2023, Month.APRIL,
-                1, 1, 1);
+        LocalDateTime create = LocalDateTime.parse("2023-04-01T01:01:01");
         CommentDto commentDto = new CommentDto(null, "text", itemDto, "Name",
                 create);
 
