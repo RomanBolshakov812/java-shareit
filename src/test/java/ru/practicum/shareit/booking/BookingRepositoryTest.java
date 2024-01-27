@@ -1,6 +1,10 @@
 package ru.practicum.shareit.booking;
-
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +18,6 @@ import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @SpringJUnitConfig
@@ -46,7 +45,7 @@ class BookingRepositoryTest {
     private Booking booking7Future;
 
     @BeforeEach
-    public void BeforeEach() {
+    public void beforeEach() {
         user1 = userRepository
                 .save(new User(null, "Василий", "vasya@mail.ru"));
         user2 = userRepository

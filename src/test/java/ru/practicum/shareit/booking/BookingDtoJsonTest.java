@@ -1,5 +1,7 @@
 package ru.practicum.shareit.booking;
 
+import java.time.LocalDateTime;
+import static org.assertj.core.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
@@ -10,9 +12,6 @@ import ru.practicum.shareit.booking.dto.BookingDtoOut;
 import ru.practicum.shareit.booking.dto.BookingDtoShort;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.dto.UserDto;
-import java.time.LocalDateTime;
-import java.time.Month;
-import static org.assertj.core.api.Assertions.*;
 
 @JsonTest
 public class BookingDtoJsonTest {
@@ -28,8 +27,8 @@ public class BookingDtoJsonTest {
     private final UserDto booker = new UserDto(1, "Booker", "booker@mail.ru");
     private final BookingDtoShort lastBooking = new BookingDtoShort(1, 1);
     private final BookingDtoShort nextBooking = new BookingDtoShort(2, 2);
-    private final ItemDto item = new ItemDto(1,"item","item description",
-            true, lastBooking, nextBooking,null,1);
+    private final ItemDto item = new ItemDto(1, "item", "item description",
+            true, lastBooking, nextBooking, null, 1);
 
     // BookingDtoIn
     @Test
@@ -57,10 +56,8 @@ public class BookingDtoJsonTest {
         assertThat(this.dtoInJson.parse(content).getObject())
                 .isEqualTo(new BookingDtoIn(
                         1,
-                        LocalDateTime.of(2023, Month.JANUARY,
-                                1, 1, 1, 1),
-                        LocalDateTime.of(2023, Month.FEBRUARY,
-                                1, 1, 1, 1)));
+                        LocalDateTime.parse("2023-01-01T01:01:01"),
+                        LocalDateTime.parse("2023-02-01T01:01:01")));
     }
 
     // BookingDtoOut
@@ -106,10 +103,8 @@ public class BookingDtoJsonTest {
         assertThat(this.dtoOutJson.parse(content).getObject())
                 .isEqualTo(new BookingDtoOut(
                         1,
-                        LocalDateTime.of(2023, Month.JANUARY,
-                                1, 1, 1, 1),
-                        LocalDateTime.of(2023, Month.FEBRUARY,
-                                1, 1, 1, 1),
+                        LocalDateTime.parse("2023-01-01T01:01:01"),
+                        LocalDateTime.parse("2023-02-01T01:01:01"),
                         item,
                         booker,
                         BookingState.WAITING));

@@ -2,18 +2,18 @@ package ru.practicum.shareit.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.mockito.Mockito.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.shareit.user.dto.UserDto;
-import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.junit.jupiter.api.Assertions.*;
+import ru.practicum.shareit.user.dto.UserDto;
 
 @WebMvcTest(UserController.class)
 class UserControllerTest {
@@ -28,7 +28,7 @@ class UserControllerTest {
     private UserDto userDto;
 
     @BeforeEach
-    void BeforeEach() {
+    void beforeEach() {
         userId = 1;
         userDto = new UserDto(userId, "Name", "mail@mail.ru");
     }

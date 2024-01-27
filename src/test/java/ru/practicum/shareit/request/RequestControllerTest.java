@@ -1,22 +1,22 @@
 package ru.practicum.shareit.request;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDateTime;
 import lombok.SneakyThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.mockito.Mockito.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.shareit.request.dto.RequestDtoIn;
-import ru.practicum.shareit.request.dto.RequestDtoOut;
-import java.time.LocalDateTime;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import ru.practicum.shareit.request.dto.RequestDtoIn;
+import ru.practicum.shareit.request.dto.RequestDtoOut;
 
 @WebMvcTest(RequestController.class)
 class RequestControllerTest {
@@ -31,7 +31,7 @@ class RequestControllerTest {
     private Integer userId;
 
     @BeforeEach
-    void BeforeEach() {
+    void beforeEach() {
         requestId = 1;
         userId = 1;
     }

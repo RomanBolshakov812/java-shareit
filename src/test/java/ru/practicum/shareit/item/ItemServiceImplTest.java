@@ -1,11 +1,20 @@
 package ru.practicum.shareit.item;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import static org.mockito.Mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.booking.BookingRepository;
+import ru.practicum.shareit.booking.BookingState;
+import ru.practicum.shareit.booking.dto.BookingDtoShort;
+import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exception.EntityNullException;
 import ru.practicum.shareit.exception.NullObjectException;
 import ru.practicum.shareit.exception.ValidationException;
@@ -19,14 +28,6 @@ import ru.practicum.shareit.request.RequestRepository;
 import ru.practicum.shareit.request.model.Request;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ItemServiceImplTest {
@@ -45,10 +46,14 @@ class ItemServiceImplTest {
     private User user;
     private Item item;
     private ItemDto emptyItem;
-    private ItemDto itemDtoIn;
+    private ItemDto itemDto;
+    private Booking lastBooking;
+    private Booking nextBooking;
+    private BookingDtoShort lastBookingDtoShort;
+    private BookingDtoShort nextBookingDtoShort;
 
     @BeforeEach
-    public void BeforeEach() {
+    public void beforeEach() {
         itemService = new ItemServiceImpl(itemRepository,
                 commentRepository, userRepository, bookingRepository, requestRepository);
         item = new Item(1, "item1", "item1 description",
@@ -56,9 +61,15 @@ class ItemServiceImplTest {
         user = new User(1, "Василий", "vasya@mail.ru");
         emptyItem = new ItemDto(null, null, null, null, null,
                 null, null, null);
-        itemDtoIn = new ItemDto(1, "item1", "item1 description", true,
+        itemDto = new ItemDto(1, "item1", "item1 description", true,
                 null, null, null, null);
-
+        User booker = new User(2, "Петр", "petya@mail.ru");
+        lastBooking = new Booking(1, LocalDateTime.parse("2023-01-01T01:01:01"),
+                LocalDateTime.now().plusDays(1), item, booker, BookingState.APPROVED);
+        nextBooking = new Booking(2, LocalDateTime.now().plusDays(1),
+                LocalDateTime.now().plusDays(2), item, booker, BookingState.APPROVED);
+        lastBookingDtoShort = new BookingDtoShort(1, 2);
+        nextBookingDtoShort = new BookingDtoShort(2, 2);
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
         lenient().when(userRepository.findById(100)).thenReturn(Optional.empty());
         when(itemRepository.findById(any())).thenReturn(Optional.of(item));
@@ -70,7 +81,7 @@ class ItemServiceImplTest {
     @Test
     void addItem_whenUserNotFound_thenEntityNullExceptionThrown() {
         EntityNullException exception = assertThrows(EntityNullException.class,
-                () -> itemService.addItem(itemDtoIn, 100));
+                () -> itemService.addItem(itemDto, 100));
 
         assertEquals("Пользователь с id = 100 не найден!", exception.getMessage());
     }
@@ -83,11 +94,11 @@ class ItemServiceImplTest {
         ItemDto itemDtoWithRequest = new ItemDto(1,
                 "item1", "item1 description", true,
                 null, null, null, 1);
-        Item ItemToSaveInRepository = ItemMapper.toItem(itemDtoWithRequest, 1, request);
+        Item itemToSaveInRepository = ItemMapper.toItem(itemDtoWithRequest, 1, request);
         Item expectedItem = new Item(1, "item1", "item1 description",
                 true, 1, request);
         when(requestRepository.findById(anyInt())).thenReturn(Optional.of(request));
-        when(itemRepository.save(ItemToSaveInRepository)).thenReturn(expectedItem);
+        when(itemRepository.save(itemToSaveInRepository)).thenReturn(expectedItem);
         ItemDto expectedItemDto = ItemMapper.toItemDto(expectedItem);
 
         ItemDto actualItemDto = itemService.addItem(itemDtoWithRequest, 1);
@@ -100,7 +111,7 @@ class ItemServiceImplTest {
         ItemDto expectedItemDto = ItemMapper.toItemDto(item);
         when(itemRepository.save(any(Item.class))).thenReturn(item);
 
-        ItemDto actualItemDto = itemService.addItem(itemDtoIn, 1);
+        ItemDto actualItemDto = itemService.addItem(itemDto, 1);
 
         assertEquals(expectedItemDto, actualItemDto);
     }
@@ -109,7 +120,7 @@ class ItemServiceImplTest {
     @Test
     void updateItem_whenItemNotFound_thenEntityNullExceptionThrown() {
         EntityNullException exception = assertThrows(EntityNullException.class,
-                () -> itemService.updateItem(100, itemDtoIn, 1));
+                () -> itemService.updateItem(100, itemDto, 1));
 
         assertEquals("Вещь с id = 100 не найдена!", exception.getMessage());
     }
@@ -117,43 +128,43 @@ class ItemServiceImplTest {
     @Test
     void updateItem_whenUserNotFound_thenNullObjectExceptionThrown() {
         NullObjectException exception = assertThrows(NullObjectException.class,
-                () -> itemService.updateItem(1, itemDtoIn, 2));
+                () -> itemService.updateItem(1, itemDto, 2));
 
         assertEquals("Неверный id владельца вещи!", exception.getMessage());
     }
 
     @Test
     void updateItem_whenUpdateName_thenReturnedItemWithNewName() {
-        itemDtoIn = emptyItem;
-        itemDtoIn.setName("New Name");
+        itemDto = emptyItem;
+        itemDto.setName("New Name");
         Item expectedItem = new Item(1, "New Name", "item1 description",
                 true, 1, null);
 
-        ItemDto actualItemDto = itemService.updateItem(1, itemDtoIn, 1);
+        ItemDto actualItemDto = itemService.updateItem(1, itemDto, 1);
 
         assertEquals(ItemMapper.toItemDto(expectedItem), actualItemDto);
     }
 
     @Test
     void updateItem_whenUpdateDescription_thenReturnedItemWithNewName() {
-        itemDtoIn = emptyItem;
-        itemDtoIn.setDescription("New description");
+        itemDto = emptyItem;
+        itemDto.setDescription("New description");
         Item expectedItem = new Item(1, "item1", "New description",
                 true, 1, null);
 
-        ItemDto actualItemDto = itemService.updateItem(1, itemDtoIn, 1);
+        ItemDto actualItemDto = itemService.updateItem(1, itemDto, 1);
 
         assertEquals(ItemMapper.toItemDto(expectedItem), actualItemDto);
     }
 
     @Test
     void updateItem_whenUpdateAvailable_thenReturnedItemWithNewName() {
-        itemDtoIn = emptyItem;
-        itemDtoIn.setAvailable(false);
+        itemDto = emptyItem;
+        itemDto.setAvailable(false);
         Item expectedItem = new Item(1, "item1", "item1 description",
                 false, 1, null);
 
-        ItemDto actualItemDto = itemService.updateItem(1, itemDtoIn, 1);
+        ItemDto actualItemDto = itemService.updateItem(1, itemDto, 1);
 
         assertEquals(ItemMapper.toItemDto(expectedItem), actualItemDto);
     }
@@ -164,6 +175,14 @@ class ItemServiceImplTest {
         itemService.getItemsByOwnerId(1);
 
         verify(itemRepository).findAllItemsByOwnerIdOrderById(1);
+    }
+
+    @Test
+    void getItem_whenItemNotFound_thenReturnedEntityNullException() {
+        EntityNullException exception = assertThrows(EntityNullException.class,
+                () -> itemService.getItem(100, 1));
+
+        assertEquals("Вещь с id = 100 не найдена!", exception.getMessage());
     }
 
     @Test
@@ -262,5 +281,93 @@ class ItemServiceImplTest {
         actualCommentDto.setCreated(created);
 
         assertEquals(expectedCommentDto, actualCommentDto);
+    }
+
+    // GET LAST BOOKING
+    @Test
+    void getLastBooking_whenLastBookingNotFound_thenReturnedNull() {
+        lenient().when(itemRepository.findById(5)).thenReturn(Optional.of(item));
+        lenient().when(bookingRepository
+                .findTopBookingByItemIdAndStartBeforeOrderByStartDesc(anyInt(),
+                        any(LocalDateTime.class))).thenReturn(null);
+        lenient().when(commentRepository.findAllCommentByItemId(5)).thenReturn(new ArrayList<>());
+
+        ItemDto actualItemDto = itemService.getItem(5, 1);
+        BookingDtoShort actualLastBooking = actualItemDto.getLastBooking();
+
+        assertNull(actualLastBooking);
+    }
+
+    @Test
+    void getLastBooking_whenLastBookingIsRejected_thenReturnedNull() {
+        lastBooking.setStatus(BookingState.REJECTED);
+        lenient().when(itemRepository.findById(5)).thenReturn(Optional.of(item));
+        lenient().when(bookingRepository
+                .findTopBookingByItemIdAndStartBeforeOrderByStartDesc(5,
+                        LocalDateTime.now())).thenReturn(lastBooking);
+        lenient().when(commentRepository.findAllCommentByItemId(5)).thenReturn(new ArrayList<>());
+
+        ItemDto actualItemDto = itemService.getItem(5, 1);
+        BookingDtoShort actualLastBooking = actualItemDto.getLastBooking();
+
+        assertNull(actualLastBooking);
+    }
+
+    @Test
+    void getLastBooking_whenLastBookingIsFound_thenReturnedLastBooking() {
+        lenient().when(itemRepository.findById(5)).thenReturn(Optional.of(item));
+        lenient().when(bookingRepository
+                .findTopBookingByItemIdAndStartBeforeOrderByStartDesc(anyInt(),
+                        any(LocalDateTime.class))).thenReturn(lastBooking);
+        lenient().when(commentRepository.findAllCommentByItemId(5)).thenReturn(new ArrayList<>());
+
+        ItemDto actualItemDto = itemService.getItem(5, 1);
+        BookingDtoShort actualLastBooking = actualItemDto.getLastBooking();
+
+        assertEquals(lastBookingDtoShort, actualLastBooking);
+    }
+
+    // GET NEXT BOOKING
+    @Test
+    void getNextBooking_whenNextBookingNotFound_thenReturnedNull() {
+        lenient().when(itemRepository.findById(5)).thenReturn(Optional.of(item));
+        lenient().when(bookingRepository
+                .findTopBookingByItemIdAndStartAfterOrderByStart(anyInt(),
+                        any(LocalDateTime.class))).thenReturn(null);
+        lenient().when(commentRepository.findAllCommentByItemId(5)).thenReturn(new ArrayList<>());
+
+        ItemDto actualItemDto = itemService.getItem(5, 1);
+        BookingDtoShort actualNextBooking = actualItemDto.getNextBooking();
+
+        assertNull(actualNextBooking);
+    }
+
+    @Test
+    void getNextBooking_whenNextBookingIsRejected_thenReturnedNull() {
+        nextBooking.setStatus(BookingState.REJECTED);
+        lenient().when(itemRepository.findById(5)).thenReturn(Optional.of(item));
+        lenient().when(bookingRepository
+                .findTopBookingByItemIdAndStartAfterOrderByStart(5,
+                        LocalDateTime.now())).thenReturn(nextBooking);
+        lenient().when(commentRepository.findAllCommentByItemId(5)).thenReturn(new ArrayList<>());
+
+        ItemDto actualItemDto = itemService.getItem(5, 1);
+        BookingDtoShort actualNextBooking = actualItemDto.getNextBooking();
+
+        assertNull(actualNextBooking);
+    }
+
+    @Test
+    void getNextBooking_whenNextBookingIsFound_thenReturnedNextBooking() {
+        lenient().when(itemRepository.findById(5)).thenReturn(Optional.of(item));
+        lenient().when(bookingRepository
+                .findTopBookingByItemIdAndStartAfterOrderByStart(anyInt(),
+                        any(LocalDateTime.class))).thenReturn(nextBooking);
+        lenient().when(commentRepository.findAllCommentByItemId(5)).thenReturn(new ArrayList<>());
+
+        ItemDto actualItemDto = itemService.getItem(5, 1);
+        BookingDtoShort actualNextBooking = actualItemDto.getNextBooking();
+
+        assertEquals(nextBookingDtoShort, actualNextBooking);
     }
 }

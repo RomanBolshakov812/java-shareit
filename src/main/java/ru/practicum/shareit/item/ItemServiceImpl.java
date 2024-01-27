@@ -26,7 +26,6 @@ import ru.practicum.shareit.user.model.User;
 @Service
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
-
     private final ItemRepository itemRepository;
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;

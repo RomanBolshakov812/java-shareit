@@ -1,6 +1,12 @@
 package ru.practicum.shareit.item;
 
+import java.util.List;
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,12 +18,6 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.dto.UserDto;
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
-import javax.transaction.Transactional;
-import java.util.List;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 
 @Transactional
 @SpringBootTest(
@@ -36,7 +36,7 @@ class ItemServiceImplIntegrationTest {
     private ItemDto itemDto2;
 
     @BeforeEach
-    public void BeforeEach() {
+    public void beforeEach() {
         userDto = new UserDto(null, "User", "mail@mail.ru");
         itemDto1 = new ItemDto(null, "item1", "d1", true,
                 null, null, null, null);

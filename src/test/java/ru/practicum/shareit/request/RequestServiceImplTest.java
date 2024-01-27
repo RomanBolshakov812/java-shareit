@@ -1,9 +1,18 @@
 package ru.practicum.shareit.request;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import org.mockito.Mock;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -16,15 +25,6 @@ import ru.practicum.shareit.request.mapper.RequestMapper;
 import ru.practicum.shareit.request.model.Request;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class RequestServiceImplTest {
@@ -44,7 +44,7 @@ class RequestServiceImplTest {
     private LocalDateTime created;
 
     @BeforeEach
-    void BeforeEach() {
+    void beforeEach() {
         created = LocalDateTime.now();
         requestId = 1;
         requestService = new RequestServiceImpl(requestRepository, userRepository);

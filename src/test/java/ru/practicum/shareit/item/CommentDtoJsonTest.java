@@ -1,5 +1,7 @@
 package ru.practicum.shareit.item;
 
+import java.time.LocalDateTime;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
@@ -7,17 +9,14 @@ import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import java.time.LocalDateTime;
-import java.time.Month;
-import static org.assertj.core.api.Assertions.assertThat;
 
 @JsonTest
 public class CommentDtoJsonTest {
     @Autowired
     private JacksonTester<CommentDto> json;
     private final LocalDateTime created = LocalDateTime.parse("2023-01-01T01:01:01");
-    private final ItemDto item = new ItemDto(1,"item","description",
-            true, null, null,null,1);
+    private final ItemDto item = new ItemDto(1, "item", "description",
+            true, null, null, null, 1);
 
     @Test
     void testSerializeCommentDto() throws Exception {
@@ -55,7 +54,6 @@ public class CommentDtoJsonTest {
                         "text",
                         item,
                         "Петя",
-                        LocalDateTime.of(2023, Month.JANUARY,
-                                1, 1, 1, 1)));
+                        LocalDateTime.parse("2023-01-01T01:01:01")));
     }
 }

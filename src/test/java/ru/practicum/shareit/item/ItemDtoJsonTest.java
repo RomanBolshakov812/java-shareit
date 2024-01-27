@@ -2,6 +2,10 @@ package ru.practicum.shareit.item;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
@@ -10,10 +14,6 @@ import org.springframework.boot.test.json.JsonContent;
 import ru.practicum.shareit.booking.dto.BookingDtoShort;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import static org.assertj.core.api.Assertions.assertThat;
 
 @JsonTest
 public class ItemDtoJsonTest {
@@ -22,8 +22,8 @@ public class ItemDtoJsonTest {
     private final ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
     private final BookingDtoShort lastBooking = new BookingDtoShort(1, 1);
     private final BookingDtoShort nextBooking = new BookingDtoShort(2, 2);
-    private final ItemDto itemDto = new ItemDto(1,"item1","item1 description",
-            true, lastBooking, nextBooking,null,1);
+    private final ItemDto itemDto = new ItemDto(1, "item1", "item1 description",
+            true, lastBooking, nextBooking, null, 1);
     private final LocalDateTime create = LocalDateTime.parse("2023-01-01T01:01:01");
     private final CommentDto commentDto = new CommentDto(1, "Comment", itemDto,
             "Петр", create);

@@ -1,21 +1,21 @@
 package ru.practicum.shareit.user;
 
+import java.util.Optional;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import static org.mockito.Mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.exception.EntityNullException;
 import ru.practicum.shareit.exception.NegativeValueException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
-import java.util.Optional;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceImplTest {
@@ -27,7 +27,7 @@ public class UserServiceImplTest {
     private User user;
 
     @BeforeEach
-    public void BeforeEach() {
+    public void beforeEach() {
         user = new User(1, "Name", "mail@mail.ru");
         when(userRepository.findById(Mockito.anyInt())).thenReturn(Optional.of(user));
         lenient().when(userRepository.findById(100)).thenReturn(Optional.empty());
@@ -60,12 +60,12 @@ public class UserServiceImplTest {
         assertThrows(EntityNullException.class,
                 () -> userService.updateUser(100, actualUser));
     }
-    
+
     @Test
     void updateUser_whenUpdateName_thenReturnedUser() {
         UserDto userWithNewName = new UserDto(null, "New Name", null);
         User expectedUser = new User(1, "New Name", "mail@mail.ru");
-        
+
         UserDto actualUser = userService.updateUser(1, userWithNewName);
 
         assertEquals(UserMapper.toUserDto(expectedUser), actualUser);

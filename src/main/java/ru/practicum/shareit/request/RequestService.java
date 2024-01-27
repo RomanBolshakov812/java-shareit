@@ -6,13 +6,13 @@ import ru.practicum.shareit.request.dto.RequestDtoOut;
 
 public interface RequestService {
 
-    public RequestDtoOut addRequest(RequestDtoIn requestDtoIn, Integer requestorId);
+    RequestDtoOut addRequest(RequestDtoIn requestDtoIn, Integer requestorId);
 
-    public RequestDtoOut getRequest(Integer requestId, Integer sharerId);
+    RequestDtoOut getRequest(Integer requestId, Integer sharerId);
 
-    public List<RequestDtoOut> getRequestsByRequestorId(Integer requestorId,
+    List<RequestDtoOut> getRequestsByRequestorId(Integer requestorId,
                                                         Integer from, Integer size);
 
-    public List<RequestDtoOut> getRequestsOtherUsers(Integer requestorId,
+    List<RequestDtoOut> getRequestsOtherUsers(Integer requestorId,
                                                      Integer from, Integer size);
 }

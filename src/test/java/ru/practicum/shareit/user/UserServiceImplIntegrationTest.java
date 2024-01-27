@@ -1,6 +1,12 @@
 package ru.practicum.shareit.user;
 
+import java.util.List;
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,12 +15,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
-import javax.transaction.Transactional;
-import java.util.List;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
 
 @Transactional
 @SpringBootTest(
@@ -30,7 +30,7 @@ class UserServiceImplIntegrationTest {
     private User user2;
 
     @BeforeEach
-    public  void BeforeEach() {
+    public  void beforeEach() {
         user1 = new User(null, "User1", "mail1@mail.ru");
         user2 = new User(null, "User2", "mail2@mail.ru");
     }

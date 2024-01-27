@@ -145,15 +145,17 @@
 						</systemPropertyVariables>
 					</configuration>
 				</plugin>
+
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-checkstyle-plugin</artifactId>
 					<version>3.1.2</version>
 					<configuration>
-						<configLocation>checkstyle.xml</configLocation>
+						<configLocation>my_checkstyle.xml</configLocation>
 						<failOnViolation>true</failOnViolation>
 						<logViolationsToConsole>true</logViolationsToConsole>
 						<includeTestSourceDirectory>true</includeTestSourceDirectory>
+						<!--<configLocation>google_checks.xml</configLocation>-->
 					</configuration>
 					<executions>
 						<execution>
@@ -171,6 +173,7 @@
 						</dependency>
 					</dependencies>
 				</plugin>
+
 				<plugin>
 					<groupId>com.github.spotbugs</groupId>
 					<artifactId>spotbugs-maven-plugin</artifactId>

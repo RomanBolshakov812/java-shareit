@@ -1,6 +1,10 @@
 package ru.practicum.shareit.item;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +15,6 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @SpringJUnitConfig
@@ -38,7 +38,7 @@ class CommentRepositoryTest {
     private LocalDateTime created;
 
     @BeforeEach
-    public  void  BeforeEach() {
+    public  void  beforeEach() {
         created = LocalDateTime.now();
         user1 = new User(null, "User1", "mail1@mail.ru");
         user2 = new User(null, "User2", "mail2@mail.ru");

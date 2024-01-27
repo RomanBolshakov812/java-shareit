@@ -1,5 +1,7 @@
 package ru.practicum.shareit.request;
 
+import java.time.LocalDateTime;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
@@ -7,9 +9,6 @@ import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import ru.practicum.shareit.request.dto.RequestDtoIn;
 import ru.practicum.shareit.request.dto.RequestDtoOut;
-import java.time.LocalDateTime;
-import java.time.Month;
-import static org.assertj.core.api.Assertions.assertThat;
 
 @JsonTest
 public class RequestDtoJsonTest {
@@ -46,8 +45,7 @@ public class RequestDtoJsonTest {
                 .isEqualTo(new RequestDtoIn(
                         1,
                         "description",
-                        LocalDateTime.of(2023, Month.JANUARY,
-                                1, 1, 1, 1)));
+                        LocalDateTime.parse("2023-01-01T01:01:01")));
     }
 
     // RequestDtoOut
@@ -80,8 +78,7 @@ public class RequestDtoJsonTest {
                 .isEqualTo(new RequestDtoOut(
                         1,
                         "description",
-                        LocalDateTime.of(2023, Month.JANUARY,
-                                1, 1, 1, 1),
+                        LocalDateTime.parse("2023-01-01T01:01:01"),
                         null));
     }
 }
