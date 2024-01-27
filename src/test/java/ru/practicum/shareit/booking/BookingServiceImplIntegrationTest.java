@@ -59,12 +59,12 @@ class BookingServiceImplIntegrationTest {
                 null, null, null, null);
         itemDto2 = new ItemDto(null, "item2", "d2", true,
                 null, null, null, null);
-        bookingDtoIn1 = new BookingDtoIn(1, start, end.plusDays(5));
-        bookingDtoIn2 = new BookingDtoIn(2, start.plusDays(1), end.plusDays(7));
         userDto1 = userService.addUser(userDto1);
         userDto2 = userService.addUser(userDto2);
         itemDto1 = itemService.addItem(itemDto1, userDto2.getId());
         itemDto2 = itemService.addItem(itemDto2, userDto2.getId());
+        bookingDtoIn1 = new BookingDtoIn(itemDto1.getId(), start, end.plusDays(5));
+        bookingDtoIn2 = new BookingDtoIn(itemDto2.getId(), start.plusDays(1), end.plusDays(7));
         bookingDtoOut1 = bookingService.addBooking(bookingDtoIn1, userDto1.getId());
         bookingDtoOut2 = bookingService.addBooking(bookingDtoIn2, userDto1.getId());
     }
