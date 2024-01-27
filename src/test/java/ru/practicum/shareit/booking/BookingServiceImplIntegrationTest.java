@@ -63,10 +63,10 @@ class BookingServiceImplIntegrationTest {
         bookingDtoIn2 = new BookingDtoIn(2, start.plusDays(1), end.plusDays(7));
         userDto1 = userService.addUser(userDto1);
         userDto2 = userService.addUser(userDto2);
-        itemDto1 = itemService.addItem(itemDto1, 2);
-        itemDto2 = itemService.addItem(itemDto2, 2);
-        bookingDtoOut1 = bookingService.addBooking(bookingDtoIn1, 1);
-        bookingDtoOut2 = bookingService.addBooking(bookingDtoIn2, 1);
+        itemDto1 = itemService.addItem(itemDto1, userDto2.getId());
+        itemDto2 = itemService.addItem(itemDto2, userDto2.getId());
+        bookingDtoOut1 = bookingService.addBooking(bookingDtoIn1, userDto1.getId());
+        bookingDtoOut2 = bookingService.addBooking(bookingDtoIn2, userDto1.getId());
     }
 
     @Test
@@ -81,7 +81,7 @@ class BookingServiceImplIntegrationTest {
                 .toListBookingDtoOut(queryResultList);
 
         List<BookingDtoOut> actualBookingsList =
-                bookingService.getBookingsByBookerId(1, from, size, "WAITING");
+                bookingService.getBookingsByBookerId(userDto1.getId(), from, size, "WAITING");
 
         assertThat(actualBookingsList.size(), equalTo(2));
         assertThat(expectedBookingsList, equalTo(actualBookingsList));
