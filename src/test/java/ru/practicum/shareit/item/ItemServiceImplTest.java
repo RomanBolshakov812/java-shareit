@@ -51,11 +51,15 @@ class ItemServiceImplTest {
     private Booking nextBooking;
     private BookingDtoShort lastBookingDtoShort;
     private BookingDtoShort nextBookingDtoShort;
+    private Integer wrongUserId;
+    private Integer wrongItemId;
 
     @BeforeEach
     public void beforeEach() {
         itemService = new ItemServiceImpl(itemRepository,
                 commentRepository, userRepository, bookingRepository, requestRepository);
+        wrongUserId = 100;
+        wrongItemId = 100;
         item = new Item(1, "item1", "item1 description",
                 true, 1, null);
         user = new User(1, "Василий", "vasya@mail.ru");
@@ -71,9 +75,9 @@ class ItemServiceImplTest {
         lastBookingDtoShort = new BookingDtoShort(1, 2);
         nextBookingDtoShort = new BookingDtoShort(2, 2);
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
-        lenient().when(userRepository.findById(100)).thenReturn(Optional.empty());
+        lenient().when(userRepository.findById(wrongUserId)).thenReturn(Optional.empty());
         when(itemRepository.findById(any())).thenReturn(Optional.of(item));
-        lenient().when(itemRepository.findById(100)).thenReturn(Optional.empty());
+        lenient().when(itemRepository.findById(wrongItemId)).thenReturn(Optional.empty());
         lenient().when(itemRepository.save(item)).thenReturn(item);
     }
 
@@ -81,7 +85,7 @@ class ItemServiceImplTest {
     @Test
     void addItem_whenUserNotFound_thenEntityNullExceptionThrown() {
         EntityNullException exception = assertThrows(EntityNullException.class,
-                () -> itemService.addItem(itemDto, 100));
+                () -> itemService.addItem(itemDto, wrongUserId));
 
         assertEquals("Пользователь с id = 100 не найден!", exception.getMessage());
     }
@@ -120,7 +124,7 @@ class ItemServiceImplTest {
     @Test
     void updateItem_whenItemNotFound_thenEntityNullExceptionThrown() {
         EntityNullException exception = assertThrows(EntityNullException.class,
-                () -> itemService.updateItem(100, itemDto, 1));
+                () -> itemService.updateItem(wrongItemId, itemDto, 1));
 
         assertEquals("Вещь с id = 100 не найдена!", exception.getMessage());
     }
@@ -180,7 +184,7 @@ class ItemServiceImplTest {
     @Test
     void getItem_whenItemNotFound_thenReturnedEntityNullException() {
         EntityNullException exception = assertThrows(EntityNullException.class,
-                () -> itemService.getItem(100, 1));
+                () -> itemService.getItem(wrongItemId, 1));
 
         assertEquals("Вещь с id = 100 не найдена!", exception.getMessage());
     }
@@ -225,7 +229,7 @@ class ItemServiceImplTest {
     @Test
     void addComment_whenItemNotFound_thenEntityNulExceptionThrown() {
         EntityNullException exception = assertThrows(EntityNullException.class,
-                () -> itemService.addComment(null, 100, 1));
+                () -> itemService.addComment(null, wrongItemId, 1));
 
         assertEquals("Вещь с id = 100 не найдена!", exception.getMessage());
     }
@@ -233,7 +237,7 @@ class ItemServiceImplTest {
     @Test
     void addComment_whenUserNotFound_thenEntityNulExceptionThrown() {
         EntityNullException exception = assertThrows(EntityNullException.class,
-                () -> itemService.addComment(null, 1, 100));
+                () -> itemService.addComment(null, 1, wrongUserId));
 
         assertEquals("Пользователь с id = 100 не найден!", exception.getMessage());
     }
@@ -277,7 +281,8 @@ class ItemServiceImplTest {
         when(commentRepository.save(any(Comment.class))).thenReturn(comment);
         CommentDto expectedCommentDto = CommentMapper.toCommentDto(comment);
 
-        CommentDto actualCommentDto = itemService.addComment(commentDtoIn, 1, 1);
+        CommentDto actualCommentDto = itemService.addComment(commentDtoIn,
+                item.getId(), user.getId());
         actualCommentDto.setCreated(created);
 
         assertEquals(expectedCommentDto, actualCommentDto);
@@ -286,13 +291,13 @@ class ItemServiceImplTest {
     // GET LAST BOOKING
     @Test
     void getLastBooking_whenLastBookingNotFound_thenReturnedNull() {
-        lenient().when(itemRepository.findById(5)).thenReturn(Optional.of(item));
         lenient().when(bookingRepository
                 .findTopBookingByItemIdAndStartBeforeOrderByStartDesc(anyInt(),
                         any(LocalDateTime.class))).thenReturn(null);
-        lenient().when(commentRepository.findAllCommentByItemId(5)).thenReturn(new ArrayList<>());
+        lenient().when(commentRepository.findAllCommentByItemId(anyInt()))
+                .thenReturn(new ArrayList<>());
 
-        ItemDto actualItemDto = itemService.getItem(5, 1);
+        ItemDto actualItemDto = itemService.getItem(item.getId(), user.getId());
         BookingDtoShort actualLastBooking = actualItemDto.getLastBooking();
 
         assertNull(actualLastBooking);
@@ -301,13 +306,13 @@ class ItemServiceImplTest {
     @Test
     void getLastBooking_whenLastBookingIsRejected_thenReturnedNull() {
         lastBooking.setStatus(BookingState.REJECTED);
-        lenient().when(itemRepository.findById(5)).thenReturn(Optional.of(item));
         lenient().when(bookingRepository
-                .findTopBookingByItemIdAndStartBeforeOrderByStartDesc(5,
+                .findTopBookingByItemIdAndStartBeforeOrderByStartDesc(item.getId(),
                         LocalDateTime.now())).thenReturn(lastBooking);
-        lenient().when(commentRepository.findAllCommentByItemId(5)).thenReturn(new ArrayList<>());
+        lenient().when(commentRepository.findAllCommentByItemId(anyInt()))
+                .thenReturn(new ArrayList<>());
 
-        ItemDto actualItemDto = itemService.getItem(5, 1);
+        ItemDto actualItemDto = itemService.getItem(item.getId(), user.getId());
         BookingDtoShort actualLastBooking = actualItemDto.getLastBooking();
 
         assertNull(actualLastBooking);
@@ -315,13 +320,13 @@ class ItemServiceImplTest {
 
     @Test
     void getLastBooking_whenLastBookingIsFound_thenReturnedLastBooking() {
-        lenient().when(itemRepository.findById(5)).thenReturn(Optional.of(item));
         lenient().when(bookingRepository
                 .findTopBookingByItemIdAndStartBeforeOrderByStartDesc(anyInt(),
                         any(LocalDateTime.class))).thenReturn(lastBooking);
-        lenient().when(commentRepository.findAllCommentByItemId(5)).thenReturn(new ArrayList<>());
+        lenient().when(commentRepository.findAllCommentByItemId(anyInt()))
+                .thenReturn(new ArrayList<>());
 
-        ItemDto actualItemDto = itemService.getItem(5, 1);
+        ItemDto actualItemDto = itemService.getItem(item.getId(), user.getId());
         BookingDtoShort actualLastBooking = actualItemDto.getLastBooking();
 
         assertEquals(lastBookingDtoShort, actualLastBooking);
@@ -330,13 +335,13 @@ class ItemServiceImplTest {
     // GET NEXT BOOKING
     @Test
     void getNextBooking_whenNextBookingNotFound_thenReturnedNull() {
-        lenient().when(itemRepository.findById(5)).thenReturn(Optional.of(item));
         lenient().when(bookingRepository
                 .findTopBookingByItemIdAndStartAfterOrderByStart(anyInt(),
                         any(LocalDateTime.class))).thenReturn(null);
-        lenient().when(commentRepository.findAllCommentByItemId(5)).thenReturn(new ArrayList<>());
+        lenient().when(commentRepository.findAllCommentByItemId(item.getId()))
+                .thenReturn(new ArrayList<>());
 
-        ItemDto actualItemDto = itemService.getItem(5, 1);
+        ItemDto actualItemDto = itemService.getItem(item.getId(), user.getId());
         BookingDtoShort actualNextBooking = actualItemDto.getNextBooking();
 
         assertNull(actualNextBooking);
@@ -345,13 +350,13 @@ class ItemServiceImplTest {
     @Test
     void getNextBooking_whenNextBookingIsRejected_thenReturnedNull() {
         nextBooking.setStatus(BookingState.REJECTED);
-        lenient().when(itemRepository.findById(5)).thenReturn(Optional.of(item));
         lenient().when(bookingRepository
-                .findTopBookingByItemIdAndStartAfterOrderByStart(5,
+                .findTopBookingByItemIdAndStartAfterOrderByStart(item.getId(),
                         LocalDateTime.now())).thenReturn(nextBooking);
-        lenient().when(commentRepository.findAllCommentByItemId(5)).thenReturn(new ArrayList<>());
+        lenient().when(commentRepository.findAllCommentByItemId(item.getId()))
+                .thenReturn(new ArrayList<>());
 
-        ItemDto actualItemDto = itemService.getItem(5, 1);
+        ItemDto actualItemDto = itemService.getItem(item.getId(), user.getId());
         BookingDtoShort actualNextBooking = actualItemDto.getNextBooking();
 
         assertNull(actualNextBooking);
@@ -359,13 +364,13 @@ class ItemServiceImplTest {
 
     @Test
     void getNextBooking_whenNextBookingIsFound_thenReturnedNextBooking() {
-        lenient().when(itemRepository.findById(5)).thenReturn(Optional.of(item));
         lenient().when(bookingRepository
                 .findTopBookingByItemIdAndStartAfterOrderByStart(anyInt(),
                         any(LocalDateTime.class))).thenReturn(nextBooking);
-        lenient().when(commentRepository.findAllCommentByItemId(5)).thenReturn(new ArrayList<>());
+        lenient().when(commentRepository.findAllCommentByItemId(anyInt()))
+                .thenReturn(new ArrayList<>());
 
-        ItemDto actualItemDto = itemService.getItem(5, 1);
+        ItemDto actualItemDto = itemService.getItem(item.getId(), user.getId());
         BookingDtoShort actualNextBooking = actualItemDto.getNextBooking();
 
         assertEquals(nextBookingDtoShort, actualNextBooking);

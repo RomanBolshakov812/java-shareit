@@ -137,8 +137,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingDtoOut> getBookingsByOwnerId(Integer ownerId, Integer from,
-                                                    Integer size, String state)
-            throws UnsupportedStatusException {
+                                                    Integer size, String state) {
         List<Booking> bookings;
         Pageable page = bookingsToPage(from, size);
         switch (stateToEnum(state)) {

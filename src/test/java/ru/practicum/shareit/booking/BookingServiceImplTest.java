@@ -20,6 +20,7 @@ import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exception.EntityNullException;
 import ru.practicum.shareit.exception.NullObjectException;
+import ru.practicum.shareit.exception.UnsupportedStatusException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -52,11 +53,15 @@ class BookingServiceImplTest {
     private Page<Booking> bookingPage;
     private Integer from;
     private Integer size;
+    private Integer wrongUserId;
+    private Integer wrongItemId;
 
     @BeforeEach
     public void beforeEach() {
         bookingService = new BookingServiceImpl(bookingRepository, itemRepository,
                 userRepository);
+        wrongUserId = 100;
+        wrongItemId = 100;
         start = LocalDateTime.now();
         end = start.plusDays(2);
         booker = new User(1, "BookerName", "booker@mail.ru");
@@ -64,7 +69,7 @@ class BookingServiceImplTest {
                 true, 2, null);
         booking1 = new Booking(1, LocalDateTime.now(), LocalDateTime.now().plusDays(2), item,
                 booker, null);
-        bookingDtoIn = new BookingDtoIn(1, start, end);
+        bookingDtoIn = new BookingDtoIn(item.getId(), start, end);
         bookings = new ArrayList<>();
         bookings.add(booking1);
         expectedBookingsDtoOuts = BookingMapper.toListBookingDtoOut(bookings);
@@ -74,11 +79,11 @@ class BookingServiceImplTest {
 
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.of(booker));
-        lenient().when(userRepository.findById(100))
+        lenient().when(userRepository.findById(wrongUserId))
                 .thenReturn(Optional.empty());
         when(itemRepository.findById(anyInt()))
                 .thenReturn(Optional.of(item));
-        lenient().when(itemRepository.findById(100))
+        lenient().when(itemRepository.findById(wrongItemId))
                 .thenReturn(Optional.empty());
         lenient().when(bookingRepository.findById(anyInt()))
                 .thenReturn(Optional.of(booking1));
@@ -112,7 +117,7 @@ class BookingServiceImplTest {
     @Test
     void addBooking_whenNotExistingUserId_EntityNullExceptionThrown() {
         EntityNullException exception = assertThrows(EntityNullException.class, () ->
-            bookingService.addBooking(bookingDtoIn, 100));
+            bookingService.addBooking(bookingDtoIn, wrongUserId));
 
         assertEquals("Пользователь с id = 100 не найден!",
                 exception.getMessage());
@@ -120,7 +125,7 @@ class BookingServiceImplTest {
 
     @Test
     void addBooking_whenNotExistItemId_EntityNullExceptionThrown() {
-        BookingDtoIn bookingWithWrongItemId = new BookingDtoIn(100, start, end);
+        BookingDtoIn bookingWithWrongItemId = new BookingDtoIn(wrongItemId, start, end);
 
         EntityNullException exception = assertThrows(EntityNullException.class, () ->
                 bookingService.addBooking(bookingWithWrongItemId, 1));
@@ -206,7 +211,7 @@ class BookingServiceImplTest {
     @Test
     void updateBooking_whenWrongOwnerId_NullObjectExceptionThrown() {
         NullObjectException exception = assertThrows(NullObjectException.class, () ->
-                bookingService.updateBooking(1, 100, "true"));
+                bookingService.updateBooking(1, wrongUserId, "true"));
 
         assertEquals("Пользователь c id = 100 не является хозяином вещи!",
                 exception.getMessage());
@@ -237,6 +242,15 @@ class BookingServiceImplTest {
     }
 
     // GET BOOKING BY BOOKER ID
+    @Test
+    void getBookingsByBookerId_whenWrongStatus_thenReturnedUnsupportedStatusException() {
+        UnsupportedStatusException exception = assertThrows(UnsupportedStatusException.class, () ->
+                bookingService.getBookingsByBookerId(1, from, size, "UNSUPPORTED"));
+
+        assertEquals("Передан неверный статус бронирования: UNSUPPORTED!",
+                exception.getMessage());
+    }
+
     @Test
     void getBookingsByBookerId_whenStateFuture_thenReturnedInvoked() {
         when(bookingRepository.findBookingByBookerIdAndStartAfterOrderByStartDesc(anyInt(),
@@ -329,6 +343,15 @@ class BookingServiceImplTest {
     }
 
     // GET BOOKING BY OWNER ID
+    @Test
+    void getBookingsByOwnerId_whenWrongStatus_thenReturnedUnsupportedStatusException() {
+        UnsupportedStatusException exception = assertThrows(UnsupportedStatusException.class, () ->
+                bookingService.getBookingsByOwnerId(1, from, size, "UNSUPPORTED"));
+
+        assertEquals("Передан неверный статус бронирования: UNSUPPORTED!",
+                exception.getMessage());
+    }
+
     @Test
     void getBookingsByOwnerId_whenStateFuture_thenReturnedInvoked() {
         when(bookingRepository.findAllBookingsByOwnerFuture(anyInt(), any(Pageable.class)))

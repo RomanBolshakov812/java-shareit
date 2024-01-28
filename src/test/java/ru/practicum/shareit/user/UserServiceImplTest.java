@@ -25,12 +25,14 @@ public class UserServiceImplTest {
     @InjectMocks
     private UserServiceImpl userService;
     private User user;
+    private Integer wrongUserId;
 
     @BeforeEach
     public void beforeEach() {
+        wrongUserId = 100;
         user = new User(1, "Name", "mail@mail.ru");
         when(userRepository.findById(Mockito.anyInt())).thenReturn(Optional.of(user));
-        lenient().when(userRepository.findById(100)).thenReturn(Optional.empty());
+        lenient().when(userRepository.findById(wrongUserId)).thenReturn(Optional.empty());
         lenient().when(userRepository.save(user)).thenReturn(user);
     }
 
@@ -104,6 +106,6 @@ public class UserServiceImplTest {
 
     @Test
     void getUser_whenUserNotFound_thenEntityNullExceptionThrown() {
-        assertThrows(EntityNullException.class, () -> userService.getUser(100));
+        assertThrows(EntityNullException.class, () -> userService.getUser(wrongUserId));
     }
 }

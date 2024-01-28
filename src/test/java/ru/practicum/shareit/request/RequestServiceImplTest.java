@@ -42,9 +42,13 @@ class RequestServiceImplTest {
     private Item item;
     private List<Item> items;
     private LocalDateTime created;
+    private Integer wrongUserId;
+    private Integer wrongRequestId;
 
     @BeforeEach
     void beforeEach() {
+        wrongUserId = 100;
+        wrongRequestId = 100;
         created = LocalDateTime.now();
         requestId = 1;
         requestService = new RequestServiceImpl(requestRepository, userRepository);
@@ -54,18 +58,18 @@ class RequestServiceImplTest {
                 true, 1, null);
         items = new ArrayList<>();
         items.add(item);
-        request = new Request(1, "description", user, created, null);
-        requestDtoIn = new RequestDtoIn(1, "description", created);
+        request = new Request(requestId, "description", user, created, null);
+        requestDtoIn = new RequestDtoIn(requestId, "description", created);
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
-        lenient().when(userRepository.findById(100)).thenReturn(Optional.empty());
+        lenient().when(userRepository.findById(wrongUserId)).thenReturn(Optional.empty());
         when(requestRepository.findById(anyInt())).thenReturn(Optional.ofNullable(request));
-        lenient().when(requestRepository.findById(100)).thenReturn(Optional.empty());
+        lenient().when(requestRepository.findById(wrongRequestId)).thenReturn(Optional.empty());
     }
 
     @Test
     void addRequest_whenUserNotFound_thenReturnedEntityNullException() {
         EntityNullException exception = assertThrows(EntityNullException.class,
-                () -> requestService.addRequest(requestDtoIn, 100));
+                () -> requestService.addRequest(requestDtoIn, wrongUserId));
 
         assertEquals("Пользователь с id = 100 не найден!", exception.getMessage());
     }
@@ -84,7 +88,7 @@ class RequestServiceImplTest {
     @Test
     void getRequest_whenUserNotFound_thenReturnedEntityNullException() {
         EntityNullException exception = assertThrows(EntityNullException.class,
-                () -> requestService.getRequest(requestId, 100));
+                () -> requestService.getRequest(requestId, wrongUserId));
 
         assertEquals("Пользователь с id = 100 не найден!", exception.getMessage());
     }
@@ -92,7 +96,7 @@ class RequestServiceImplTest {
     @Test
     void getRequest_whenRequestNotFound_thenReturnedEntityNullException() {
         EntityNullException exception = assertThrows(EntityNullException.class,
-                () -> requestService.getRequest(100, userId));
+                () -> requestService.getRequest(wrongRequestId, userId));
 
         assertEquals("Запрос с id = 100 не найден!", exception.getMessage());
     }
@@ -111,7 +115,7 @@ class RequestServiceImplTest {
     @Test
     void getRequestsByRequestorId_whenUserNotFound_thenReturnedEntityNullException() {
         EntityNullException exception = assertThrows(EntityNullException.class,
-                () -> requestService.getRequestsByRequestorId(100, 0, 1));
+                () -> requestService.getRequestsByRequestorId(wrongUserId, 0, 1));
 
         assertEquals("Передан неверный id пользователя: id = 100!", exception.getMessage());
     }

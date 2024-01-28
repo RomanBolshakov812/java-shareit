@@ -21,12 +21,6 @@ public class ErrorHandler {
         return new ErrorResponse("Ошибка валидации!", e.getMessage());
     }
 
-    @ExceptionHandler(DuplicateException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleNullRequestException(final DuplicateException e) {
-        return new ErrorResponse("Ошибка валидации!", e.getMessage());
-    }
-
     @ExceptionHandler(NegativeValueException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNegativeValueException(final NegativeValueException e) {
