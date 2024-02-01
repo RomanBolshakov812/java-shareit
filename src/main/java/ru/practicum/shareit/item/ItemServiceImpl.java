@@ -17,6 +17,8 @@ import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.RequestRepository;
+import ru.practicum.shareit.request.model.Request;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
@@ -24,23 +26,31 @@ import ru.practicum.shareit.user.model.User;
 @Service
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
-
     private final ItemRepository itemRepository;
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
+    private final RequestRepository requestRepository;
 
     @Override
     public ItemDto addItem(ItemDto itemDto, Integer ownerId) {
-        UserMapper.toUserDto(userRepository.getUserById(ownerId).orElseThrow(() ->
+        UserMapper.toUserDto(userRepository.findById(ownerId).orElseThrow(() ->
                 new EntityNullException("Пользователь с id = " + ownerId + " не найден!")));
-        Item item = ItemMapper.toItem(itemDto, ownerId);
-        return ItemMapper.toItemDto(itemRepository.save(item));
+        Request request;
+        Integer requestId = itemDto.getRequestId();
+        if (requestId != null) {
+            request = requestRepository.findById(requestId).orElseThrow();
+        } else {
+            request = null;
+        }
+        Item item = ItemMapper.toItem(itemDto, ownerId, request);
+        itemRepository.save(item);
+        return ItemMapper.toItemDto(item);
     }
 
     @Override
     public ItemDto updateItem(Integer itemId, ItemDto itemDto, Integer ownerId) {
-        Item updatedItem = itemRepository.getItemById(itemId).orElseThrow(() ->
+        Item updatedItem = itemRepository.findById(itemId).orElseThrow(() ->
         new EntityNullException("Вещь с id = " + itemId + " не найдена!"));
         if (!Objects.equals(updatedItem.getOwnerId(), ownerId)) {
             throw new NullObjectException("Неверный id владельца вещи!");
@@ -60,7 +70,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> getItemsByOwnerId(Integer ownerId) {
-        List<Item> itemsByOwnerId = itemRepository.findItemByOwnerIdOrderById(ownerId);
+        List<Item> itemsByOwnerId = itemRepository.findAllItemsByOwnerIdOrderById(ownerId);
         List<Integer> itemsId = new ArrayList<>();
         for (Item item : itemsByOwnerId) {
             itemsId.add(item.getId());
@@ -75,7 +85,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto getItem(Integer itemId, Integer sharerId) {
-        Item item = itemRepository.getItemById(itemId).orElseThrow(() ->
+        Item item = itemRepository.findById(itemId).orElseThrow(() ->
                 new EntityNullException("Вещь с id = " + itemId + " не найдена!"));
         Booking lastBooking = getLastBooking(itemId);
         Booking nextBooking = getNextBooking(itemId);
@@ -105,14 +115,15 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public CommentDto addComment(CommentDto commentDto, Integer itemId, Integer authorId) {
+        Item item = itemRepository.findById(itemId).orElseThrow(() ->
+                new EntityNullException("Вещь с id = " + itemId + " не найдена!"));
+        User author = userRepository.findById(authorId).orElseThrow(() ->
+                new EntityNullException("Пользователь с id = " + authorId + " не найден!"));
         isValid(itemId, authorId);
         LocalDateTime created = LocalDateTime.now();
-        Item item = itemRepository.getItemById(itemId).orElseThrow(() ->
-                new EntityNullException("Вещь с id = " + itemId + " не найдена!"));
-        User author = userRepository.getUserById(authorId).orElseThrow(() ->
-                new EntityNullException("Пользователь с id = " + authorId + " не найден!"));
-        return CommentMapper.toCommentDto(commentRepository
-                .save(CommentMapper.toComment(commentDto, item, author, created)));
+        Comment comment = CommentMapper.toComment(commentDto, item, author, created);
+        commentRepository.save(comment);
+        return CommentMapper.toCommentDto(comment);
     }
 
     private Booking getLastBooking(Integer itemId) {

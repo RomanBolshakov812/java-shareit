@@ -6,13 +6,15 @@ import ru.practicum.shareit.booking.dto.BookingDtoOut;
 
 public interface BookingService {
 
-    public BookingDtoOut addBooking(BookingDtoIn bookingDtoIn, Integer bookerId);
+    BookingDtoOut addBooking(BookingDtoIn bookingDtoIn, Integer bookerId);
 
-    public BookingDtoOut updateBooking(Integer bookingId, Integer ownerId, String approved);
+    BookingDtoOut updateBooking(Integer bookingId, Integer ownerId, String approved);
 
-    public BookingDtoOut getBooking(Integer bookingId, Integer sharerId);
+    BookingDtoOut getBooking(Integer bookingId, Integer sharerId);
 
-    public List<BookingDtoOut> getBookingsByBookerId(Integer bookerId, String state);
+    List<BookingDtoOut> getBookingsByBookerId(Integer bookerId, Integer from,
+                                                     Integer size, String state);
 
-    public List<BookingDtoOut> getBookingsByOwnerId(Integer ownerId, String state);
+    List<BookingDtoOut> getBookingsByOwnerId(Integer ownerId, Integer from,
+                                                    Integer size, String state);
 }

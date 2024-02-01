@@ -1,10 +1,12 @@
 package ru.practicum.shareit.booking;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDtoIn;
 import ru.practicum.shareit.booking.dto.BookingDtoOut;
@@ -35,10 +37,10 @@ public class BookingServiceImpl implements BookingService {
         if (end.isBefore(start) || start.equals(end)) {
             throw new ValidationException("Неверные даты бронирования!");
         }
-        User booker = userRepository.getUserById(bookerId).orElseThrow(() ->
+        User booker = userRepository.findById(bookerId).orElseThrow(() ->
                 new EntityNullException("Пользователь с id = " + bookerId + " не найден!"));
-        Item item = itemRepository.getItemById(itemId).orElseThrow(() ->
-                new EntityNullException("Вещь с id = " + bookerId + " не найдена!"));
+        Item item = itemRepository.findById(itemId).orElseThrow(() ->
+                new EntityNullException("Вещь с id = " + itemId + " не найдена!"));
         if (!item.getAvailable()) {
             throw new ValidationException("Данная вещь недоступна!");
         }
@@ -55,31 +57,32 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingDtoOut updateBooking(Integer bookingId, Integer userId, String approved) {
+    public BookingDtoOut updateBooking(Integer bookingId, Integer ownerId, String approved) {
         BookingState state;
         if (Objects.equals(approved, "true")) {
             state = BookingState.APPROVED;
         } else {
             state = BookingState.REJECTED;
         }
-        Booking booking = bookingRepository.getBookingById(bookingId).orElseThrow(() ->
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->
                 new EntityNullException("Бронирование с id = " + bookingId + " не найдено!"));
         Item item = booking.getItem();
-        if (Objects.equals(item.getOwnerId(), userId)) {
+        if (Objects.equals(item.getOwnerId(), ownerId)) {
             if (!booking.getStatus().equals(BookingState.APPROVED)) {
                 booking.setStatus(state);
             } else {
                 throw new ValidationException("Бронирование уже подтверждено!");
             }
-            return BookingMapper.toBookingDtoOut(bookingRepository.save(booking));
+            bookingRepository.save(booking);
+            return BookingMapper.toBookingDtoOut(booking);
         }
-        throw new NullObjectException("Пользователь c id = " + userId
+        throw new NullObjectException("Пользователь c id = " + ownerId
                 + " не является хозяином вещи!");
     }
 
     @Override
     public BookingDtoOut getBooking(Integer bookingId, Integer sharerId) {
-        Booking booking = bookingRepository.getBookingById(bookingId)
+        Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new EntityNullException("Бронирование с id = "
                         + bookingId + " не найдено!"));
         if (!Objects.equals(booking.getBooker().getId(), sharerId)) {
@@ -92,35 +95,37 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDtoOut> getBookingsByBookerId(Integer bookerId, String state) {
-        List<Booking> bookings = new ArrayList<>();
+    public List<BookingDtoOut> getBookingsByBookerId(Integer bookerId, Integer from,
+                                                     Integer size, String state) {
+        List<Booking> bookings;
+        Pageable page = bookingsToPage(from, size);
         switch (stateToEnum(state)) {
             case FUTURE:
                 bookings = bookingRepository
                         .findBookingByBookerIdAndStartAfterOrderByStartDesc(bookerId,
-                                LocalDateTime.now());
+                                LocalDateTime.now(), page).toList();
                 break;
             case CURRENT:
-                bookings = bookingRepository.findAllBookingByBookerIdCurrent(bookerId);
+                bookings = bookingRepository.findAllBookingByBookerCurrent(bookerId, page).toList();
                 break;
             case PAST:
-                bookings = bookingRepository.findAllBookingByBookerPast(bookerId);
+                bookings = bookingRepository.findAllBookingByBookerPast(bookerId, page).toList();
                 break;
             case WAITING:
                 bookings = bookingRepository.findBookingOfBookerByStatus(bookerId,
-                        BookingState.WAITING);
+                        BookingState.WAITING, page).toList();
                 break;
             case APPROVED:
                 bookings = bookingRepository.findBookingOfBookerByStatus(bookerId,
-                        BookingState.APPROVED);
+                        BookingState.APPROVED, page).toList();
                 break;
             case REJECTED:
                 bookings = bookingRepository.findBookingOfBookerByStatus(bookerId,
-                        BookingState.REJECTED);
+                        BookingState.REJECTED, page).toList();
                 break;
             default:
                 bookings = bookingRepository
-                        .findBookingByBookerIdOrderByStartDesc(bookerId);
+                        .findBookingByBookerIdOrderByStartDesc(bookerId, page).toList();
                 break;
         }
         if (bookings.size() == 0) {
@@ -131,33 +136,34 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDtoOut> getBookingsByOwnerId(Integer ownerId, String state)
-            throws UnsupportedStatusException {
-        List<Booking> bookings = new ArrayList<>();
+    public List<BookingDtoOut> getBookingsByOwnerId(Integer ownerId, Integer from,
+                                                    Integer size, String state) {
+        List<Booking> bookings;
+        Pageable page = bookingsToPage(from, size);
         switch (stateToEnum(state)) {
             case FUTURE:
-                bookings = bookingRepository.findAllBookingByOwnerFuture(ownerId);
+                bookings = bookingRepository.findAllBookingsByOwnerFuture(ownerId, page).toList();
                 break;
             case CURRENT:
-                bookings = bookingRepository.findAllBookingByOwnerIdCurrent(ownerId);
+                bookings = bookingRepository.findAllBookingByOwnerCurrent(ownerId, page).toList();
                 break;
             case PAST:
-                bookings = bookingRepository.findAllBookingByOwnerPast(ownerId);
+                bookings = bookingRepository.findAllBookingByOwnerPast(ownerId, page).toList();
                 break;
             case WAITING:
                 bookings = bookingRepository.findBookingOfOwnerByStatus(ownerId,
-                        BookingState.WAITING);
+                        BookingState.WAITING, page).toList();
                 break;
             case APPROVED:
                 bookings = bookingRepository.findBookingOfOwnerByStatus(ownerId,
-                        BookingState.APPROVED);
+                        BookingState.APPROVED, page).toList();
                 break;
             case REJECTED:
                 bookings = bookingRepository.findBookingOfOwnerByStatus(ownerId,
-                        BookingState.REJECTED);
+                        BookingState.REJECTED, page).toList();
                 break;
             default:
-                bookings = bookingRepository.findAllBookingByOwner(ownerId);
+                bookings = bookingRepository.findAllBookingByOwner(ownerId, page).toList();
                 break;
         }
         if (bookings.size() == 0) {
@@ -165,6 +171,12 @@ public class BookingServiceImpl implements BookingService {
                     + ownerId + " не найдено!");
         }
         return BookingMapper.toListBookingDtoOut(bookings);
+    }
+
+    private  Pageable bookingsToPage(Integer from, Integer size) {
+        Sort sort = Sort.by(Sort.Direction.ASC, "start");
+        int startPage = from / size;
+        return PageRequest.of(startPage, size, sort);
     }
 
     private BookingState stateToEnum(String state) {

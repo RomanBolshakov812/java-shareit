@@ -19,28 +19,24 @@ public class UserServiceImpl implements UserService {
     public UserDto addUser(UserDto userDto) {
         User user = UserMapper.toUser(userDto);
         repository.save(user);
-        return UserMapper.toUserDto(repository.save(user));
+        return UserMapper.toUserDto(user);
     }
 
     @Override
     public UserDto updateUser(Integer userId, UserDto userDto) {
-
-        User oldUser = repository.getUserById(userId).orElseThrow(() ->
-                new EntityNullException("Пользователь с id = " + userId + " не найден!"));
         if (userId < 0) {
             throw new NegativeValueException("Передано отрицательное значение id!");
         }
-        User updateUser = UserMapper.toUser(userDto);
-        String userNewName = updateUser.getName();
-        String userNewEmail = updateUser.getEmail();
-        if (userNewName == null) {
-            updateUser.setName(oldUser.getName());
+        User udatedUser = repository.findById(userId).orElseThrow(() ->
+                new EntityNullException("Пользователь с id = " + userId + " не найден!"));
+        if (userDto.getName() != null) {
+            udatedUser.setName(userDto.getName());
         }
-        if (userNewEmail == null) {
-            updateUser.setEmail(oldUser.getEmail());
+        if (userDto.getEmail() != null) {
+            udatedUser.setEmail(userDto.getEmail());
         }
-        updateUser.setId(userId);
-        return UserMapper.toUserDto(repository.save(updateUser));
+        repository.save(udatedUser);
+        return UserMapper.toUserDto(udatedUser);
     }
 
     @Override
@@ -55,7 +51,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUser(Integer userId) {
-        return UserMapper.toUserDto(repository.getUserById(userId).orElseThrow(() ->
+        return UserMapper.toUserDto(repository.findById(userId).orElseThrow(() ->
                 new EntityNullException("Пользователь с id = " + userId + " не найден!")));
     }
 }
