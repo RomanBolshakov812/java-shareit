@@ -44,8 +44,7 @@ public class ItemMapper {
             for (Item item : items) {
                 itemsDto.add(toItemDto(item));
             }
-            return itemsDto;
         }
-        return null;
+        return itemsDto;
     }
 }

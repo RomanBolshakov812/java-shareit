@@ -15,9 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.UserRepository;
-import ru.practicum.shareit.user.UserService;
-import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.model.User;
 
 @Transactional
 @SpringBootTest(
@@ -28,34 +26,31 @@ class ItemServiceImplIntegrationTest {
 
     private final EntityManager em;
     private final ItemService itemService;
-    private final ItemRepository itemRepository;
-    private final UserService userService;
-    private final UserRepository userRepository;
-    private UserDto userDto;
+    private User user;
     private ItemDto itemDto1;
     private ItemDto itemDto2;
 
     @BeforeEach
     public void beforeEach() {
-        userDto = new UserDto(null, "User", "mail@mail.ru");
+        user = new User(null, "User", "mail@mail.ru");
         itemDto1 = new ItemDto(null, "item1", "d1", true,
                 null, null, null, null);
         itemDto2 = new ItemDto(null, "item2", "d2", true,
                 null, null, null, null);
-        userDto = userService.addUser(userDto);
-        itemDto1 = itemService.addItem(itemDto1, userDto.getId());
-        itemDto2 = itemService.addItem(itemDto2, userDto.getId());
+        em.persist(user);
+        itemDto1 = itemService.addItem(itemDto1, user.getId());
+        itemDto2 = itemService.addItem(itemDto2, user.getId());
     }
 
     @Test
     void getItemsByOwnerId() {
         TypedQuery<Item> query = em.createQuery("Select i from Item i "
                 + "where i.ownerId = :id", Item.class);
-        query.setParameter("id", userDto.getId());
+        query.setParameter("id", user.getId());
         List<Item> queryResultList = query.getResultList();
         List<ItemDto> expectedItemsList = ItemMapper.toListItemDto(queryResultList);
 
-        List<ItemDto> actualItemsList = itemService.getItemsByOwnerId(userDto.getId());
+        List<ItemDto> actualItemsList = itemService.getItemsByOwnerId(user.getId());
 
         assertThat(actualItemsList.size(), equalTo(2));
         assertThat(expectedItemsList, equalTo(actualItemsList));
@@ -65,7 +60,7 @@ class ItemServiceImplIntegrationTest {
 
     @AfterEach
     public void deleteAll() {
-        userRepository.deleteAll();
-        itemRepository.deleteAll();
+        em.createNativeQuery("truncate table users");
+        em.createNativeQuery("truncate table items");
     }
 }
