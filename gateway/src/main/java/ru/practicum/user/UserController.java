@@ -1,40 +1,42 @@
-package ru.practicum.shareit.user;
+package ru.practicum.user;
 
-import java.util.List;
-import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
+
+import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/users")
 public class UserController {
 
-    private final UserService userService;
+    private final UserClient userClient;
 
     @PostMapping
-    public UserDto createUser(@Valid @RequestBody UserDto userDto) {
-        return userService.addUser(userDto);
+    public ResponseEntity<Object> createUser(@Valid @RequestBody UserDto userDto) {
+        return userClient.createUser(userDto);
     }
 
     @PatchMapping("/{userId}")
-    public UserDto updateUser(@PathVariable Integer userId, @RequestBody UserDto userDto) {
-        return userService.updateUser(userId, userDto);
+    public ResponseEntity<Object> updateUser(@PathVariable Integer userId, @RequestBody UserDto userDto) {
+        return userClient.updateUser(userId, userDto);
     }
 
     @DeleteMapping("/{userId}")
     public void deleteUser(@PathVariable Integer userId) {
-        userService.deleteUser(userId);
+        userClient.deleteUser(userId);
     }
 
     @GetMapping
-    public List<UserDto> getAllUsers() {
-        return userService.getAllUsers();
+    public ResponseEntity<Object> getAllUsers() {
+        return userClient.getAllUsers();
     }
 
     @GetMapping("/{userId}")
-    public UserDto getUser(@PathVariable Integer userId) {
-        return userService.getUser(userId);
+    public ResponseEntity<Object> getUser(@PathVariable Integer userId) {
+        return userClient.getUser(userId);
     }
 }

@@ -1,13 +1,14 @@
-package ru.practicum.shareit.request;
+package ru.practicum.request;
 
-import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+import ru.practicum.request.dto.RequestDtoIn;
+import ru.practicum.request.dto.RequestDtoOut;
+
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.request.dto.RequestDtoIn;
-import ru.practicum.shareit.request.dto.RequestDtoOut;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,13 +19,13 @@ public class RequestController {
 
     @PostMapping
     public RequestDtoOut createRequest(@Valid @RequestBody RequestDtoIn requestDtoIn,
-                                      @RequestHeader("X-Sharer-User-Id") Integer requestorId) {
+                                       @RequestHeader("X-Sharer-User-Id") Integer requestorId) {
         return service.addRequest(requestDtoIn, requestorId);
     }
 
     @GetMapping("/{requestId}")
     public RequestDtoOut getRequest(@PathVariable Integer requestId,
-                                          @RequestHeader("X-Sharer-User-Id") Integer sharerId) {
+                                    @RequestHeader("X-Sharer-User-Id") Integer sharerId) {
         return service.getRequest(requestId, sharerId);
     }
 

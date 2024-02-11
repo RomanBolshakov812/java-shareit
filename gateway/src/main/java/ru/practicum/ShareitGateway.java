@@ -4,7 +4,7 @@ package ru.practicum;
  * Hello world!
  *
  */
-public class App 
+public class ShareitGateway
 {
     public static void main( String[] args )
     {
