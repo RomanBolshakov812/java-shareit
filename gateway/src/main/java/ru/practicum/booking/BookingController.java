@@ -1,10 +1,10 @@
 package ru.practicum.booking;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.booking.dto.BookingDtoIn;
-import ru.practicum.booking.dto.BookingDtoOut;
+import ru.practicum.shareit.booking.dto.BookingDtoIn;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
@@ -18,42 +18,42 @@ import java.util.List;
 @RequestMapping(path = "/bookings")
 public class BookingController {
 
-    private final BookingService bookingService;
+    private final BookingClient bookingClient;
 
     @PostMapping
-    public BookingDtoOut createBooking(@Valid @RequestBody BookingDtoIn bookingDtoIn,
-                                       @RequestHeader("X-Sharer-User-Id") Integer bookerId) {
-        return bookingService.addBooking(bookingDtoIn, bookerId);
+    public ResponseEntity<Object> createBooking(@Valid @RequestBody BookingDtoIn bookingDtoIn,
+                                        @RequestHeader("X-Sharer-User-Id") Integer bookerId) {
+        return bookingClient.createBooking(bookingDtoIn, bookerId);
     }
 
     @PatchMapping("/{bookingId}")
-    public BookingDtoOut updateBooking(@PathVariable Integer bookingId,
+    public ResponseEntity<Object> updateBooking(@PathVariable Integer bookingId,
                                        @RequestHeader("X-Sharer-User-Id") Integer userId,
                                        @RequestParam String approved) {
-        return bookingService.updateBooking(bookingId, userId, approved);
+        return bookingClient.updateBooking(bookingId, userId, approved);
     }
 
     @GetMapping("/{bookingId}")
-    public BookingDtoOut getBooking(@PathVariable Integer bookingId,
+    public ResponseEntity<Object> getBooking(@PathVariable Integer bookingId,
                                     @RequestHeader("X-Sharer-User-Id") Integer sharerId) {
-        return bookingService.getBooking(bookingId, sharerId);
+        return bookingClient.getBooking(bookingId, sharerId);
     }
 
     @GetMapping
-    public List<BookingDtoOut> getBookingsByBookerId(
+    public ResponseEntity<Object> getBookingsByBookerId(
             @RequestHeader("X-Sharer-User-Id") Integer bookerId,
             @RequestParam(value = "from", defaultValue = "0") @PositiveOrZero Integer from,
             @RequestParam(value = "size", defaultValue = "20") @Min(1) @Max(20) Integer size,
             @RequestParam(value = "state", defaultValue = "ALL") String state) {
-        return bookingService.getBookingsByBookerId(bookerId, from, size, state);
+        return bookingClient.getBookingsByBookerId(bookerId, from, size, state);
     }
 
     @GetMapping("/owner")
-    public List<BookingDtoOut> getBookingsByOwnerId(
+    public ResponseEntity<Object> getBookingsByOwnerId(
             @RequestHeader("X-Sharer-User-Id") Integer ownerId,
             @RequestParam(value = "from", defaultValue = "0") @PositiveOrZero Integer from,
             @RequestParam(value = "size", defaultValue = "20") @Min(1) @Max(20) Integer size,
             @RequestParam(value = "state", defaultValue = "ALL") String state) {
-        return bookingService.getBookingsByOwnerId(ownerId, from, size, state);
+        return bookingClient.getBookingsByOwnerId(ownerId, from, size, state);
     }
 }
