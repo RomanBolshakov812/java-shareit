@@ -1,9 +1,10 @@
 package ru.practicum.request;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.RequestEntity;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.request.dto.RequestDtoIn;
-import ru.practicum.request.dto.RequestDtoOut;
+import ru.practicum.shareit.request.dto.RequestDtoIn;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
@@ -15,33 +16,33 @@ import java.util.List;
 @RequestMapping(path = "/requests")
 public class RequestController {
 
-    private final RequestService service;
+    private final RequestClient requestClient;
 
     @PostMapping
-    public RequestDtoOut createRequest(@Valid @RequestBody RequestDtoIn requestDtoIn,
-                                       @RequestHeader("X-Sharer-User-Id") Integer requestorId) {
-        return service.addRequest(requestDtoIn, requestorId);
+    public ResponseEntity<Object> createRequest(@Valid @RequestBody RequestDtoIn requestDtoIn,
+                                                @RequestHeader("X-Sharer-User-Id") Integer requestorId) {
+        return requestClient.createRequest(requestDtoIn, requestorId);
     }
 
     @GetMapping("/{requestId}")
-    public RequestDtoOut getRequest(@PathVariable Integer requestId,
+    public ResponseEntity<Object> getRequest(@PathVariable Integer requestId,
                                     @RequestHeader("X-Sharer-User-Id") Integer sharerId) {
-        return service.getRequest(requestId, sharerId);
+        return requestClient.getRequest(requestId, sharerId);
     }
 
     @GetMapping
-    public List<RequestDtoOut> getRequestByRequestorId(
+    public ResponseEntity<Object> getRequestsByRequestorId(
             @RequestHeader("X-Sharer-User-Id") Integer requestorId,
             @RequestParam(value = "from", defaultValue = "0") @Min(0) Integer from,
             @RequestParam(value = "size", defaultValue = "20") @Min(1) @Max(20) Integer size) {
-        return service.getRequestsByRequestorId(requestorId, from, size);
+        return requestClient.getRequestsByRequestorId(requestorId, from, size);
     }
 
     @GetMapping("/all")
-    public List<RequestDtoOut> getRequestsByOtherUsers(
+    public ResponseEntity<Object> getRequestsByOtherUsers(
             @RequestHeader("X-Sharer-User-Id") Integer requestorId,
             @RequestParam(value = "from", defaultValue = "0") @Min(0) Integer from,
             @RequestParam(value = "size", defaultValue = "20") @Min(1) @Max(20) Integer size) {
-        return service.getRequestsOtherUsers(requestorId, from, size);
+        return requestClient.getRequestsByOtherUsers(requestorId, from, size);
     }
 }
