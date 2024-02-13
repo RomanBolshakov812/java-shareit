@@ -1,12 +1,11 @@
 package ru.practicum.client;
 
+import java.util.List;
+import java.util.Map;
 import org.springframework.http.*;
 import org.springframework.lang.Nullable;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.List;
-import java.util.Map;
 
 public class BaseClient {
     protected final RestTemplate rest;
@@ -23,7 +22,8 @@ public class BaseClient {
         return get(path, userId, null);
     }
 
-    protected ResponseEntity<Object> get(String path, Integer userId, @Nullable Map<String, Object> parameters) {
+    protected ResponseEntity<Object> get(String path, Integer userId,
+                                         @Nullable Map<String, Object> parameters) {
         return makeAndSendRequest(HttpMethod.GET, path, userId, parameters, null);
     }
 

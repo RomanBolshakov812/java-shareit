@@ -35,10 +35,6 @@
 			<version>2.3.3.RELEASE</version>
 		</dependency>
 
-
-
-
-
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
@@ -62,7 +58,7 @@
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
 		</dependency>
-<!--    ВАЛИДАЦИЮ НУЖНО БУЖЕТ УБРАТЬ В pom ГЕЙТВЕЯ!!!         -->
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>

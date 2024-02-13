@@ -1,18 +1,15 @@
 package ru.practicum.booking;
 
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
+import ru.practicum.booking.dto.BookingDtoIn;
 import ru.practicum.client.BaseClient;
-import ru.practicum.shareit.booking.dto.BookingDtoIn;
-
-import java.util.Map;
 
 @Service
 public class BookingClient extends BaseClient {

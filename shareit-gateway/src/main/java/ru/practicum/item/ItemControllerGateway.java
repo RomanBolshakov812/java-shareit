@@ -1,11 +1,11 @@
 package ru.practicum.item;
 
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.dto.CommentDto;
-import ru.practicum.shareit.item.dto.ItemDto;
-import javax.validation.Valid;
+import ru.practicum.item.dto.CommentDto;
+import ru.practicum.item.dto.ItemDto;
 
 @RestController
 @RequiredArgsConstructor

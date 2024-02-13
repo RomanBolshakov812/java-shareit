@@ -1,13 +1,12 @@
 package ru.practicum.request;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.request.dto.RequestDtoIn;
-
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import ru.practicum.request.dto.RequestDtoIn;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,8 +17,9 @@ public class RequestControllerGateway {
     private final RequestClient requestClient;
 
     @PostMapping
-    public ResponseEntity<Object> createRequest(@Valid @RequestBody RequestDtoIn requestDtoIn,
-                                                @RequestHeader("X-Sharer-User-Id") Integer requestorId) {
+    public ResponseEntity<Object> createRequest(
+            @Valid @RequestBody RequestDtoIn requestDtoIn,
+            @RequestHeader("X-Sharer-User-Id") Integer requestorId) {
         return requestClient.createRequest(requestDtoIn, requestorId);
     }
 

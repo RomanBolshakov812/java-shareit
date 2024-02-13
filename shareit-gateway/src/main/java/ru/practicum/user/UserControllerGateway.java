@@ -1,11 +1,10 @@
 package ru.practicum.user;
 
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.user.dto.UserDto;
-
-import javax.validation.Valid;
+import ru.practicum.user.dto.UserDto;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,7 +20,8 @@ public class UserControllerGateway {
     }
 
     @PatchMapping("/{userId}")
-    public ResponseEntity<Object> updateUser(@PathVariable Integer userId, @RequestBody UserDto userDto) {
+    public ResponseEntity<Object> updateUser(@PathVariable Integer userId,
+                                             @RequestBody UserDto userDto) {
         return userClient.updateUser(userId, userDto);
     }
 
