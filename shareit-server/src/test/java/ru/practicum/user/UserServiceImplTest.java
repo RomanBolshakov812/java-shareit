@@ -2,7 +2,6 @@ package ru.practicum.user;
 
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,14 +46,6 @@ public class UserServiceImplTest {
 
         assertEquals(expectedUser, actualUser);
     }
-
-//    @Test
-//    void updateUser_whenNegativeUserId_NegativeValueExceptionThrown() {
-//        UserDto actualUser = UserMapper.toUserDto(user);
-//
-//        assertThrows(NegativeValueException.class,
-//                () -> userService.updateUser(-1, actualUser));
-//    }
 
     @Test
     void updateUser_whenUserNotFound_EntityNullExceptionThrown() {
