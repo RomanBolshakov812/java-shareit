@@ -10,7 +10,6 @@ import ru.practicum.request.dto.RequestDtoIn;
 
 @RestController
 @RequiredArgsConstructor
-//@RequestMapping(path = "/requests")
 @RequestMapping(path = "http://localhost:9090/requests")
 public class RequestControllerGateway {
 

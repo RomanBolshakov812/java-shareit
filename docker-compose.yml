@@ -10,7 +10,7 @@ services:
       - POSTGRES_PASSWORD=iamroot
       - POSTGRES_USER=User R
       - POSTGRES_DB=shareit
-      - TZ=Europe/Moscow
+      #- TZ=Europe/Moscow
 
   shareit-server:
     build: shareit-server
@@ -25,7 +25,7 @@ services:
       - SPRING_DRIVER_CLASS_NAME:org.postgresql.Driver
       - SPRING_DATASOURCE_USERNAME:User R
       - SPRING_DATASOURCE_PASSWORD:iamroot
-      - TZ=Europe/Moscow
+      #- TZ=Europe/Moscow
 
   shareit-gateway:
     build: shareit-gateway
@@ -43,4 +43,4 @@ services:
       - SPRING_DRIVER_CLASS_NAME:org.postgresql.Driver
       - SPRING_DATASOURCE_USERNAME:User R
       - SPRING_DATASOURCE_PASSWORD:iamroot
-      - TZ=Europe/Moscow
+      #- TZ=Europe/Moscow

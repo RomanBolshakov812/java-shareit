@@ -5,6 +5,7 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +14,6 @@ import ru.practicum.booking.dto.BookingDtoIn;
 @Validated
 @RestController
 @RequiredArgsConstructor
-//@RequestMapping(path = "/bookings")
 @RequestMapping(path = "http://localhost:9090/bookings")
 public class BookingControllerGateway {
 

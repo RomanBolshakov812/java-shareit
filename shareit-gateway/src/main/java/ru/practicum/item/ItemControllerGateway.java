@@ -9,7 +9,6 @@ import ru.practicum.item.dto.ItemDto;
 
 @RestController
 @RequiredArgsConstructor
-//@RequestMapping(path = "/items")
 @RequestMapping(path = "http://localhost:9090/items")
 public class ItemControllerGateway {
 
