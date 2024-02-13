@@ -6,12 +6,12 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import javax.validation.Valid;
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(path = "/users")
-public class UserController {
+//@RequestMapping(path = "/users")
+@RequestMapping(path = "http://localhost:9090/users")
+public class UserControllerGateway {
 
     private final UserClient userClient;
 

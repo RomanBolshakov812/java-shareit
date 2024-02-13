@@ -9,8 +9,9 @@ import javax.validation.Valid;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(path = "/items")
-public class ItemController {
+//@RequestMapping(path = "/items")
+@RequestMapping(path = "http://localhost:9090/items")
+public class ItemControllerGateway {
 
     private final ItemClient itemClient;
 

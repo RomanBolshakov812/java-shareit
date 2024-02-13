@@ -1,6 +1,7 @@
 package ru.practicum.booking;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -10,13 +11,13 @@ import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.PositiveOrZero;
-import java.util.List;
 
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(path = "/bookings")
-public class BookingController {
+//@RequestMapping(path = "/bookings")
+@RequestMapping(path = "http://localhost:9090/bookings")
+public class BookingControllerGateway {
 
     private final BookingClient bookingClient;
 

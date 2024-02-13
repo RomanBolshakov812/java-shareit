@@ -1,7 +1,6 @@
 package ru.practicum.request;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.RequestDtoIn;
@@ -9,12 +8,12 @@ import ru.practicum.shareit.request.dto.RequestDtoIn;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(path = "/requests")
-public class RequestController {
+//@RequestMapping(path = "/requests")
+@RequestMapping(path = "http://localhost:9090/requests")
+public class RequestControllerGateway {
 
     private final RequestClient requestClient;
 
