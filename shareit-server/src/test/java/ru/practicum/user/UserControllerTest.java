@@ -1,18 +1,19 @@
 package ru.practicum.user;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
-import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.mockito.Mockito.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import ru.practicum.user.dto.UserDto;
 
 @WebMvcTest(UserController.class)
@@ -31,19 +32,6 @@ class UserControllerTest {
     void beforeEach() {
         userId = 1;
         userDto = new UserDto(userId, "Name", "mail@mail.ru");
-    }
-
-    @SneakyThrows
-    @Test
-    void createUser_whenUserIsNotValid_thenReturnedBadRequest() {
-        UserDto notValidUser = new UserDto(userId, null, null);
-
-        mockMvc.perform(post("/users")
-                        .contentType("application/json;charset=UTF-8")
-                        .content(objectMapper.writeValueAsString(notValidUser)))
-                .andExpect(status().isBadRequest());
-
-        verify(userService, never()).addUser(notValidUser);
     }
 
     @SneakyThrows

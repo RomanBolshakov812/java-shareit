@@ -1,20 +1,20 @@
 package ru.practicum.booking;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.LocalDateTime;
-import lombok.SneakyThrows;
 import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDateTime;
+import lombok.SneakyThrows;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.booking.dto.BookingDtoIn;
 import ru.practicum.booking.dto.BookingDtoOut;
 import ru.practicum.item.dto.ItemDto;
@@ -45,20 +45,6 @@ class BookingControllerTest {
                 null, null, null, null);
         bookingDtoIn = new BookingDtoIn(1, start, end);
         bookingDtoOut = new BookingDtoOut(1, start, end, itemDto, userDto, BookingState.WAITING);
-    }
-
-    @SneakyThrows
-    @Test
-    void createBooking_whenBookingNotValid_thenReturnedBadRequest() {
-        BookingDtoIn notValidBooking = new BookingDtoIn();
-
-        mockMvc.perform(post("/bookings")
-                        .header("X-Sharer-User-Id", userId)
-                        .contentType("application/json;charset=UTF-8")
-                        .content(objectMapper.writeValueAsString(notValidBooking)))
-                .andExpect(status().isBadRequest());
-
-        verify(bookingService, never()).addBooking(notValidBooking, userId);
     }
 
     @SneakyThrows
@@ -111,51 +97,6 @@ class BookingControllerTest {
 
     @SneakyThrows
     @Test
-    void getBookingsByBookerId_whenNegativeFrom_thenReturnedBadRequest() {
-        mockMvc.perform(get("/bookings")
-                        .header("X-Sharer-User-Id", userId)
-                        .param("from", "-1")
-                        .param("size", "1")
-                        .param("state", "WAITING"))
-                .andDo(print())
-                .andExpect(status().isBadRequest());
-
-        verify(bookingService, never())
-                .getBookingsByBookerId(userId, -1, 1, "WAITING");
-    }
-
-    @SneakyThrows
-    @Test
-    void getBookingsByBookerId_whenSizeLessOne_thenReturnedBadRequest() {
-        mockMvc.perform(get("/bookings")
-                        .header("X-Sharer-User-Id", userId)
-                        .param("from", "1")
-                        .param("size", "0")
-                        .param("state", "WAITING"))
-                .andDo(print())
-                .andExpect(status().isBadRequest());
-
-        verify(bookingService, never())
-                .getBookingsByBookerId(userId, 1, 0, "WAITING");
-    }
-
-    @SneakyThrows
-    @Test
-    void getBookingsByBookerId_whenSizeMore20_thenReturnedBadRequest() {
-        mockMvc.perform(get("/bookings")
-                        .header("X-Sharer-User-Id", userId)
-                        .param("from", "1")
-                        .param("size", "21")
-                        .param("state", "WAITING"))
-                .andDo(print())
-                .andExpect(status().isBadRequest());
-
-        verify(bookingService, never())
-                .getBookingsByBookerId(userId, 1, 21, "WAITING");
-    }
-
-    @SneakyThrows
-    @Test
     void getBookingsByBookerId_whenAllOk_thenReturnedOkStatus() {
         mockMvc.perform(get("/bookings")
                         .header("X-Sharer-User-Id", userId)
@@ -166,51 +107,6 @@ class BookingControllerTest {
                 .andExpect(status().isOk());
 
         verify(bookingService).getBookingsByBookerId(userId, 0, 1, "WAITING");
-    }
-
-    @SneakyThrows
-    @Test
-    void getBookingsByOwnerId_whenNegativeFrom_thenReturnedBadRequest() {
-        mockMvc.perform(get("/bookings")
-                        .header("X-Sharer-User-Id", userId)
-                        .param("from", "-1")
-                        .param("size", "1")
-                        .param("state", "WAITING"))
-                .andDo(print())
-                .andExpect(status().isBadRequest());
-
-        verify(bookingService, never())
-                .getBookingsByOwnerId(userId, -1, 1, "WAITING");
-    }
-
-    @SneakyThrows
-    @Test
-    void getBookingsByOwnerId_whenSizeLessOne_thenReturnedBadRequest() {
-        mockMvc.perform(get("/bookings")
-                        .header("X-Sharer-User-Id", userId)
-                        .param("from", "1")
-                        .param("size", "0")
-                        .param("state", "WAITING"))
-                .andDo(print())
-                .andExpect(status().isBadRequest());
-
-        verify(bookingService, never())
-                .getBookingsByOwnerId(userId, 1, 0, "WAITING");
-    }
-
-    @SneakyThrows
-    @Test
-    void getBookingsByOwnerId_whenSizeMore20_thenReturnedBadRequest() {
-        mockMvc.perform(get("/bookings")
-                        .header("X-Sharer-User-Id", userId)
-                        .param("from", "1")
-                        .param("size", "21")
-                        .param("state", "WAITING"))
-                .andDo(print())
-                .andExpect(status().isBadRequest());
-
-        verify(bookingService, never())
-                .getBookingsByOwnerId(userId, 1, 21, "WAITING");
     }
 
     @SneakyThrows

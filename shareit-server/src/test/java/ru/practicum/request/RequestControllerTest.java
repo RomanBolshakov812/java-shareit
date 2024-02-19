@@ -1,21 +1,21 @@
 package ru.practicum.request;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.LocalDateTime;
-import lombok.SneakyThrows;
 import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDateTime;
+import lombok.SneakyThrows;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.request.dto.RequestDtoIn;
 import ru.practicum.request.dto.RequestDtoOut;
 
@@ -35,20 +35,6 @@ class RequestControllerTest {
     void beforeEach() {
         requestId = 1;
         userId = 1;
-    }
-
-    @SneakyThrows
-    @Test
-    void createRequest_whenRequestNotValid_thenReturnedBadRequest() {
-        RequestDtoIn notValidRequest = new RequestDtoIn();
-
-        mockMvc.perform(post("/requests")
-                        .header("X-Sharer-User-Id", userId)
-                        .contentType("application/json;charset=UTF-8")
-                        .content(objectMapper.writeValueAsString(notValidRequest)))
-                .andExpect(status().isBadRequest());
-
-        verify(requestService, never()).addRequest(notValidRequest, userId);
     }
 
     @SneakyThrows

@@ -1,20 +1,20 @@
 package ru.practicum.item;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.LocalDateTime;
-import lombok.SneakyThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDateTime;
+import lombok.SneakyThrows;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.item.dto.CommentDto;
 import ru.practicum.item.dto.ItemDto;
 
@@ -37,20 +37,6 @@ class ItemControllerTest {
         userId = 1;
         itemDto = new ItemDto(null, "item1", "item1 description", true,
                 null, null, null, null);
-    }
-
-    @SneakyThrows
-    @Test
-    void createItem_whenItemNotValid_thenReturnedBadRequest() {
-        ItemDto notValidItem = new ItemDto();
-
-        mockMvc.perform(post("/items")
-                        .header("X-Sharer-User-Id", userId)
-                        .contentType("application/json;charset=UTF-8")
-                        .content(objectMapper.writeValueAsString(notValidItem)))
-                .andExpect(status().isBadRequest());
-
-        verify(itemService, never()).addItem(notValidItem, userId);
     }
 
     @SneakyThrows
@@ -123,20 +109,6 @@ class ItemControllerTest {
                 .andExpect(status().isOk());
 
         verify(itemService).searchItem("param");
-    }
-
-    @SneakyThrows
-    @Test
-    void createComment_whenCommentNotValid_thenReturnedBarRequest() {
-        CommentDto notValidComment = new CommentDto();
-
-        mockMvc.perform(post("/items/{itemId}/comment", itemId)
-                        .header("X-Sharer-User-Id", userId)
-                        .contentType("application/json;charset=UTF-8")
-                        .content(objectMapper.writeValueAsString(notValidComment)))
-                .andExpect(status().isBadRequest());
-
-        verify(itemService, never()).addComment(notValidComment, itemId, userId);
     }
 
     @SneakyThrows
