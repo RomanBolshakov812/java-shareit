@@ -1,7 +1,6 @@
 package ru.practicum.item;
 
 import java.util.List;
-import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.item.dto.CommentDto;
@@ -15,7 +14,7 @@ public class ItemController {
     private final ItemService itemService;
 
     @PostMapping
-    public ItemDto createItem(@Valid @RequestBody ItemDto itemDto,
+    public ItemDto createItem(@RequestBody ItemDto itemDto,
                               @RequestHeader("X-Sharer-User-Id") Integer ownerId) {
         return itemService.addItem(itemDto, ownerId);
     }
@@ -43,7 +42,7 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
-    public CommentDto createComment(@Valid @RequestBody CommentDto commentDto,
+    public CommentDto createComment(@RequestBody CommentDto commentDto,
                                     @PathVariable Integer itemId,
                                     @RequestHeader("X-Sharer-User-Id") Integer bookerId) {
         return itemService.addComment(commentDto, itemId, bookerId);

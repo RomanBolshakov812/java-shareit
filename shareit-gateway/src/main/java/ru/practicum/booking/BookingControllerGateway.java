@@ -8,20 +8,22 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.booking.dto.BookingDtoIn;
+import ru.practicum.booking.dto.BookingDto;
+import ru.practicum.booking.dto.BookingState;
+import ru.practicum.exception.UnsupportedStatusException;
 
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(path = "http://localhost:9090/bookings")
+@RequestMapping(path = "/bookings")
 public class BookingControllerGateway {
 
     private final BookingClient bookingClient;
 
     @PostMapping
-    public ResponseEntity<Object> createBooking(@Valid @RequestBody BookingDtoIn bookingDtoIn,
+    public ResponseEntity<Object> createBooking(@Valid @RequestBody BookingDto bookingDto,
                                         @RequestHeader("X-Sharer-User-Id") Integer bookerId) {
-        return bookingClient.createBooking(bookingDtoIn, bookerId);
+        return bookingClient.createBooking(bookingDto, bookerId);
     }
 
     @PatchMapping("/{bookingId}")
@@ -40,18 +42,22 @@ public class BookingControllerGateway {
     @GetMapping
     public ResponseEntity<Object> getBookingsByBookerId(
             @RequestHeader("X-Sharer-User-Id") Integer bookerId,
+            @RequestParam(value = "state", defaultValue = "ALL") String state,
             @RequestParam(value = "from", defaultValue = "0") @PositiveOrZero Integer from,
-            @RequestParam(value = "size", defaultValue = "20") @Min(1) @Max(20) Integer size,
-            @RequestParam(value = "state", defaultValue = "ALL") String state) {
-        return bookingClient.getBookingsByBookerId(bookerId, from, size, state);
+            @RequestParam(value = "size", defaultValue = "20") @Min(1) @Max(20) Integer size) {
+        BookingState stateParam = BookingState.from(state)
+                .orElseThrow(() -> new UnsupportedStatusException("Unknown state: " + state));
+        return bookingClient.getBookingsByBookerId(bookerId, from, size, stateParam);
     }
 
     @GetMapping("/owner")
     public ResponseEntity<Object> getBookingsByOwnerId(
             @RequestHeader("X-Sharer-User-Id") Integer ownerId,
+            @RequestParam(value = "state", defaultValue = "ALL") String state,
             @RequestParam(value = "from", defaultValue = "0") @PositiveOrZero Integer from,
-            @RequestParam(value = "size", defaultValue = "20") @Min(1) @Max(20) Integer size,
-            @RequestParam(value = "state", defaultValue = "ALL") String state) {
-        return bookingClient.getBookingsByOwnerId(ownerId, from, size, state);
+            @RequestParam(value = "size", defaultValue = "20") @Min(1) @Max(20) Integer size) {
+        BookingState stateParam = BookingState.from(state)
+                .orElseThrow(() -> new UnsupportedStatusException("Unknown state: " + state));
+        return bookingClient.getBookingsByOwnerId(ownerId, from, size, stateParam);
     }
 }

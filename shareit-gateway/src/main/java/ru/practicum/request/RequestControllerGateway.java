@@ -6,20 +6,20 @@ import javax.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.request.dto.RequestDtoIn;
+import ru.practicum.request.dto.RequestDto;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(path = "http://localhost:9090/requests")
+@RequestMapping(path = "/requests")
 public class RequestControllerGateway {
 
     private final RequestClient requestClient;
 
     @PostMapping
     public ResponseEntity<Object> createRequest(
-            @Valid @RequestBody RequestDtoIn requestDtoIn,
+            @Valid @RequestBody RequestDto requestDto,
             @RequestHeader("X-Sharer-User-Id") Integer requestorId) {
-        return requestClient.createRequest(requestDtoIn, requestorId);
+        return requestClient.createRequest(requestDto, requestorId);
     }
 
     @GetMapping("/{requestId}")

@@ -4,9 +4,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,7 +21,6 @@ import ru.practicum.booking.mapper.BookingMapper;
 import ru.practicum.booking.model.Booking;
 import ru.practicum.exception.EntityNullException;
 import ru.practicum.exception.NullObjectException;
-import ru.practicum.exception.UnsupportedStatusException;
 import ru.practicum.exception.ValidationException;
 import ru.practicum.item.ItemRepository;
 import ru.practicum.item.dto.ItemDto;
@@ -245,15 +243,6 @@ class BookingServiceImplTest {
 
     // GET BOOKING BY BOOKER ID
     @Test
-    void getBookingsByBookerId_whenWrongStatus_thenReturnedUnsupportedStatusException() {
-        UnsupportedStatusException exception = assertThrows(UnsupportedStatusException.class, () ->
-                bookingService.getBookingsByBookerId(1, from, size, "UNSUPPORTED"));
-
-        assertEquals("Передан неверный статус бронирования: UNSUPPORTED!",
-                exception.getMessage());
-    }
-
-    @Test
     void getBookingsByBookerId_whenStateFuture_thenReturnedInvoked() {
         when(bookingRepository.findBookingByBookerIdAndStartAfterOrderByStartDesc(anyInt(),
                 any(LocalDateTime.class), any(Pageable.class))).thenReturn(bookingPage);
@@ -345,15 +334,6 @@ class BookingServiceImplTest {
     }
 
     // GET BOOKING BY OWNER ID
-    @Test
-    void getBookingsByOwnerId_whenWrongStatus_thenReturnedUnsupportedStatusException() {
-        UnsupportedStatusException exception = assertThrows(UnsupportedStatusException.class, () ->
-                bookingService.getBookingsByOwnerId(1, from, size, "UNSUPPORTED"));
-
-        assertEquals("Передан неверный статус бронирования: UNSUPPORTED!",
-                exception.getMessage());
-    }
-
     @Test
     void getBookingsByOwnerId_whenStateFuture_thenReturnedInvoked() {
         when(bookingRepository.findAllBookingsByOwnerFuture(anyInt(), any(Pageable.class)))

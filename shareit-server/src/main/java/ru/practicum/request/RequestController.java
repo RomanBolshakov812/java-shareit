@@ -1,9 +1,6 @@
 package ru.practicum.request;
 
 import java.util.List;
-import javax.validation.Valid;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.request.dto.RequestDtoIn;
@@ -17,7 +14,7 @@ public class RequestController {
     private final RequestService service;
 
     @PostMapping
-    public RequestDtoOut createRequest(@Valid @RequestBody RequestDtoIn requestDtoIn,
+    public RequestDtoOut createRequest(@RequestBody RequestDtoIn requestDtoIn,
                                        @RequestHeader("X-Sharer-User-Id") Integer requestorId) {
         return service.addRequest(requestDtoIn, requestorId);
     }
@@ -31,16 +28,16 @@ public class RequestController {
     @GetMapping
     public List<RequestDtoOut> getRequestByRequestorId(
             @RequestHeader("X-Sharer-User-Id") Integer requestorId,
-            @RequestParam(value = "from", defaultValue = "0") @Min(0) Integer from,
-            @RequestParam(value = "size", defaultValue = "20") @Min(1) @Max(20) Integer size) {
+            @RequestParam(value = "from") Integer from,
+            @RequestParam(value = "size") Integer size) {
         return service.getRequestsByRequestorId(requestorId, from, size);
     }
 
     @GetMapping("/all")
     public List<RequestDtoOut> getRequestsByOtherUsers(
             @RequestHeader("X-Sharer-User-Id") Integer requestorId,
-            @RequestParam(value = "from", defaultValue = "0") @Min(0) Integer from,
-            @RequestParam(value = "size", defaultValue = "20") @Min(1) @Max(20) Integer size) {
+            @RequestParam(value = "from") Integer from,
+            @RequestParam(value = "size") Integer size) {
         return service.getRequestsOtherUsers(requestorId, from, size);
     }
 }

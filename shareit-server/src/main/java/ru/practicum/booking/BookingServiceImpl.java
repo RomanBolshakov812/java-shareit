@@ -14,7 +14,6 @@ import ru.practicum.booking.mapper.BookingMapper;
 import ru.practicum.booking.model.Booking;
 import ru.practicum.exception.EntityNullException;
 import ru.practicum.exception.NullObjectException;
-import ru.practicum.exception.UnsupportedStatusException;
 import ru.practicum.exception.ValidationException;
 import ru.practicum.item.ItemRepository;
 import ru.practicum.item.model.Item;
@@ -180,13 +179,6 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private BookingState stateToEnum(String state) {
-        BookingState status;
-        try {
-            status = BookingState.valueOf(state);
-            return status;
-        } catch (RuntimeException e) {
-            throw new UnsupportedStatusException("Передан неверный статус бронирования: "
-                    + state + "!");
-        }
+        return BookingState.valueOf(state);
     }
 }

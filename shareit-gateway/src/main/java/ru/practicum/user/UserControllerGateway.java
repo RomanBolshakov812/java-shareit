@@ -8,7 +8,7 @@ import ru.practicum.user.dto.UserDto;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(path = "http://localhost:9090/users")
+@RequestMapping(path = "/users")
 public class UserControllerGateway {
 
     private final UserClient userClient;

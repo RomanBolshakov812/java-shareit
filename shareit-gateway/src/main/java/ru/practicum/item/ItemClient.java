@@ -43,10 +43,13 @@ public class ItemClient extends BaseClient {
 
     public ResponseEntity<Object> getItemsByOwnerId(
             @RequestHeader("X-Sharer-User-Id") Integer ownerId) {
-        return get("/" + ownerId);
+        return get("/", ownerId);
     }
 
     public ResponseEntity<Object> searchItems(String text) {
+        if (text.isBlank()) {
+            return getEmptyList();
+        }
         return get("/search?text=" + text);
     }
 

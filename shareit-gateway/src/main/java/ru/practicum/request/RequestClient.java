@@ -9,7 +9,7 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.client.BaseClient;
-import ru.practicum.request.dto.RequestDtoIn;
+import ru.practicum.request.dto.RequestDto;
 
 @Service
 public class RequestClient extends BaseClient {
@@ -27,8 +27,8 @@ public class RequestClient extends BaseClient {
         );
     }
 
-    public ResponseEntity<Object> createRequest(RequestDtoIn requestDtoIn, Integer ownerId) {
-        return post("", ownerId, requestDtoIn);
+    public ResponseEntity<Object> createRequest(RequestDto requestDto, Integer ownerId) {
+        return post("", ownerId, requestDto);
     }
 
     public ResponseEntity<Object> getRequest(Integer requestId, Integer sharerId) {

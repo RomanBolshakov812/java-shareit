@@ -105,10 +105,6 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> searchItem(String text) {
-        List<ItemDto> items = new ArrayList<>();
-        if (text.isBlank()) {
-            return items;
-        }
         return ItemMapper.toListItemDto(itemRepository
                 .findByDescriptionContainingIgnoreCaseAndAvailable(text, true));
     }

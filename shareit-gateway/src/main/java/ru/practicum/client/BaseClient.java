@@ -1,5 +1,6 @@
 package ru.practicum.client;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.springframework.http.*;
@@ -12,6 +13,11 @@ public class BaseClient {
 
     public BaseClient(RestTemplate rest) {
         this.rest = rest;
+    }
+
+    protected ResponseEntity<Object> getEmptyList() {
+        ResponseEntity<Object> response = ResponseEntity.status(200).body(new ArrayList<>());
+        return prepareGatewayResponse(response);
     }
 
     protected ResponseEntity<Object> get(String path) {

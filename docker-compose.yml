@@ -35,8 +35,6 @@ services:
       - "8080:8080"
     depends_on:
     - shareit-server
-    - shareit-db
-
     environment:
       - SHAREIT_SERVER_URL=http://shareit-server:9090
       - SPRING_DATASOURCE_URL:jdbc:postgresql://shareit-db:5432/shareit

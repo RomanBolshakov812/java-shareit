@@ -1,12 +1,11 @@
-package ru.practicum.user.dto;
+package ru.practicum.booking.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class UserDto {
+public class BookingDtoShort {
     private Integer id;
-    private String name;
-    private String email;
+    private Integer bookerId;
 }
