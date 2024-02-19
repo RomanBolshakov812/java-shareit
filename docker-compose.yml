@@ -37,8 +37,4 @@ services:
     - shareit-server
     environment:
       - SHAREIT_SERVER_URL=http://shareit-server:9090
-      - SPRING_DATASOURCE_URL:jdbc:postgresql://shareit-db:5432/shareit
-      - SPRING_DRIVER_CLASS_NAME:org.postgresql.Driver
-      - SPRING_DATASOURCE_USERNAME:user1
-      - SPRING_DATASOURCE_PASSWORD:iamroot
       #- TZ=Europe/Moscow
