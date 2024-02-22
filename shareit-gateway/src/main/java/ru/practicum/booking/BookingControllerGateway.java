@@ -42,22 +42,26 @@ public class BookingControllerGateway {
     @GetMapping
     public ResponseEntity<Object> getBookingsByBookerId(
             @RequestHeader("X-Sharer-User-Id") Integer bookerId,
-            @RequestParam(value = "state", defaultValue = "ALL") String state,
+            @RequestParam(value = "state", defaultValue = "ALL") String stateParam,
             @RequestParam(value = "from", defaultValue = "0") @PositiveOrZero Integer from,
             @RequestParam(value = "size", defaultValue = "20") @Min(1) @Max(20) Integer size) {
-        BookingState stateParam = BookingState.from(state)
-                .orElseThrow(() -> new UnsupportedStatusException("Unknown state: " + state));
-        return bookingClient.getBookingsByBookerId(bookerId, from, size, stateParam);
+        System.out.println();
+        BookingState state = BookingState.from(stateParam)
+                .orElseThrow(() -> new UnsupportedStatusException("Неизвестный статус: "
+                        + stateParam));
+        return bookingClient.getBookingsByBookerId(bookerId, from, size, state);
     }
 
     @GetMapping("/owner")
     public ResponseEntity<Object> getBookingsByOwnerId(
             @RequestHeader("X-Sharer-User-Id") Integer ownerId,
-            @RequestParam(value = "state", defaultValue = "ALL") String state,
+            @RequestParam(value = "state", defaultValue = "ALL") String stateParam,
             @RequestParam(value = "from", defaultValue = "0") @PositiveOrZero Integer from,
             @RequestParam(value = "size", defaultValue = "20") @Min(1) @Max(20) Integer size) {
-        BookingState stateParam = BookingState.from(state)
-                .orElseThrow(() -> new UnsupportedStatusException("Unknown state: " + state));
-        return bookingClient.getBookingsByOwnerId(ownerId, from, size, stateParam);
+        System.out.println();
+        BookingState state = BookingState.from(stateParam)
+                .orElseThrow(() -> new UnsupportedStatusException("Неизвестный статус: "
+                        + stateParam));
+        return bookingClient.getBookingsByOwnerId(ownerId, from, size, state);
     }
 }
