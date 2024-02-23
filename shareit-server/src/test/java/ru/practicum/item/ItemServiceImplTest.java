@@ -18,8 +18,11 @@ import ru.practicum.booking.model.Booking;
 import ru.practicum.exception.EntityNullException;
 import ru.practicum.exception.NullObjectException;
 import ru.practicum.exception.ValidationException;
+import ru.practicum.item.dto.CommentDto;
 import ru.practicum.item.dto.ItemDto;
+import ru.practicum.item.mapper.CommentMapper;
 import ru.practicum.item.mapper.ItemMapper;
+import ru.practicum.item.model.Comment;
 import ru.practicum.item.model.Item;
 import ru.practicum.request.RequestRepository;
 import ru.practicum.request.model.Request;
@@ -262,6 +265,27 @@ class ItemServiceImplTest {
 
         assertEquals("У пользователя с id = 1 нет завершенных бронирований вещи с id = 1!",
                 exception.getMessage());
+    }
+
+    @Test
+    void addComment_whenOneBookingAvailable_thenReturnedInvoked() {
+        LocalDateTime created = LocalDateTime.now();
+        List<LocalDateTime> endDateBookings = new ArrayList<>();
+        endDateBookings.add(LocalDateTime.now());
+        ItemDto itemDto = ItemMapper.toItemDto(item);
+        when(bookingRepository.getListBookingEndDate(anyInt(), anyInt()))
+                .thenReturn(endDateBookings);
+        CommentDto commentDtoIn = new CommentDto(null, "Text", itemDto,
+                "Author Name", null);
+        Comment comment = new Comment(null, "Text", item, user, created);
+        when(commentRepository.save(any(Comment.class))).thenReturn(comment);
+        CommentDto expectedCommentDto = CommentMapper.toCommentDto(comment);
+
+        CommentDto actualCommentDto = itemService.addComment(commentDtoIn,
+                item.getId(), user.getId());
+        actualCommentDto.setCreated(created);
+
+        assertEquals(expectedCommentDto, actualCommentDto);
     }
 
     // GET LAST BOOKING
