@@ -48,7 +48,6 @@ class BookingControllerGatewayTest {
                 null, null, null, null);
         bookingDto = new BookingDto(1, start, end);
         response = new ResponseEntity<>(bookingDto, HttpStatus.OK);
-
     }
 
     @SneakyThrows

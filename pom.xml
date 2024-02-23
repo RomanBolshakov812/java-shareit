@@ -99,6 +99,13 @@
 					<version>0.8.8</version>
 					<configuration>
 						<output>file</output>
+						<excludes>
+							<exclude>**/*BookingClient.class</exclude>
+							<exclude>**/*ItemClient.class</exclude>
+							<exclude>**/*RequestClient.class</exclude>
+							<exclude>**/*UserClient.class</exclude>
+							<exclude>**/*BaseClient.class</exclude>
+						</excludes>
 					</configuration>
 					<executions>
 						<execution>
