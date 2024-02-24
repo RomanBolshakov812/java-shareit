@@ -7,9 +7,10 @@ services:
     ports:
       - "6542:5432"
     environment:
-      - POSTGRES_PASSWORD=iamroot
-      - POSTGRES_USER=user1
       - POSTGRES_DB=shareit
+      - POSTGRES_USER=user1
+      - POSTGRES_PASSWORD=iamroot
+      #- TZ=Europe/Moscow
 
   server:
     build: shareit-server
@@ -24,6 +25,7 @@ services:
       - SPRING_DRIVER_CLASS_NAME:org.postgresql.Driver
       - SPRING_DATASOURCE_USERNAME:user1
       - SPRING_DATASOURCE_PASSWORD:iamroot
+      #- TZ=Europe/Moscow
 
   gateway:
     build: shareit-gateway
@@ -35,3 +37,4 @@ services:
     - server
     environment:
       - SHAREIT_SERVER_URL=http://server:9090
+      #- TZ=Europe/Moscow
